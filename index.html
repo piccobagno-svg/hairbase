@@ -159,7 +159,11 @@
       data.forEach(c => {
         const div = document.createElement("div");
         div.className = "customer";
-        div.innerText = c.first_name || "Kunde";
+       div.innerHTML = `
+  ${c.first_name || "Kunde"}
+  <br>
+  <button onclick="deleteCustomer('${c.id}')">❌ Löschen</button>
+`;
         customersBox.appendChild(div);
       });
     }
@@ -211,6 +215,23 @@
     });
 
     checkSession();
+    async function deleteCustomer(id) {
+  const ok = confirm("Kunde wirklich löschen?");
+  if (!ok) return;
+
+  const { error } = await supabaseClient
+    .from("customers")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.log(error);
+    alert("Fehler beim Löschen");
+    return;
+  }
+
+  loadCustomers();
+}
   </script>
 
 </body>
