@@ -269,10 +269,10 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://rgvjhcmeclnautmwiseo.supabase.co';
+    const SUPABASE_URL = 'https://rgvjhcmeclnautmwiseo.sbClient.co';
     const SUPABASE_KEY = 'sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux';
     const supa = window.supabase;
-    const supabase = supa.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sbClient = window.sbClient.createClient(SUPABASE_URL, SUPABASE_KEY); supa.createClient(SUPABASE_URL, SUPABASE_KEY);
     const SETTINGS_KEY = 'hairbase_team_settings_v2';
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const DEFAULT_SETTINGS = { defaultEmployee: '', theme: 'system', cardSize: 'normal', showRegularsFirst: true };
@@ -500,7 +500,7 @@
 
     async function loadCustomers() {
       if (!user) return;
-      const { data, error } = await supabase.from('customers').select('*').order('updated_at', { ascending: false });
+      const { data, error } = await sbClient.from('customers').select('*').order('updated_at', { ascending: false });
       if (!error && data) { customers = data.map(rowToCustomer); renderCustomers(); }
     }
 
@@ -515,7 +515,7 @@
       els.loginBtn.disabled = true;
       els.loginMessage.textContent = 'Anmeldung läuft...';
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
         if (error) {
           els.loginMessage.textContent = error.message;
           return;
@@ -538,7 +538,7 @@
     }
 
     async function logout() {
-      await supabase.auth.signOut();
+      await sbClient.auth.signOut();
       user = null; customers = [];
       els.appView.classList.add('hidden');
       els.loginView.classList.remove('hidden');
@@ -575,14 +575,14 @@
       if (!normalized.firstName || !normalized.lastName) return;
 
       if (editingId) {
-        const { data, error } = await supabase.from('customers').update(customerToRow(normalized)).eq('id', editingId).select().single();
+        const { data, error } = await sbClient.from('customers').update(customerToRow(normalized)).eq('id', editingId).select().single();
         if (!error && data) {
           const customer = rowToCustomer(data);
           customers = customers.map(c => c.id === editingId ? customer : c);
           highlightId = editingId;
         }
       } else {
-        const { data, error } = await supabase.from('customers').insert(customerToRow(normalized)).select().single();
+        const { data, error } = await sbClient.from('customers').insert(customerToRow(normalized)).select().single();
         if (!error && data) {
           const customer = rowToCustomer(data);
           customers = [customer, ...customers];
@@ -601,7 +601,7 @@
 
     async function confirmDelete() {
       if (!deleteId) return;
-      const { error } = await supabase.from('customers').delete().eq('id', deleteId);
+      const { error } = await sbClient.from('customers').delete().eq('id', deleteId);
       if (!error) {
         customers = customers.filter(c => c.id !== deleteId);
         renderCustomers();
@@ -631,7 +631,7 @@
         const importedCustomers = Array.isArray(parsed) ? parsed : Array.isArray(parsed.customers) ? parsed.customers : [];
         if (!importedCustomers.length) return;
         const rows = importedCustomers.map(c => customerToRow(c));
-        const { error } = await supabase.from('customers').insert(rows);
+        const { error } = await sbClient.from('customers').insert(rows);
         if (!error) { await loadCustomers(); showToast('Import fertig'); }
       } catch {}
     }
@@ -702,7 +702,7 @@
       applyTheme();
       updateSettingsUI();
       try {
-        const { data } = await supabase.auth.getSession();
+        const { data } = await sbClient.auth.getSession();
         if (data && data.session && data.session.user) {
           user = data.session.user;
           await afterLogin();
