@@ -2,717 +2,136 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="theme-color" content="#18181b" />
-  <title>HairBase Team Login Fix</title>
- <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-const { createClient } = window.supabase;
-</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HairBase</title>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
   <style>
-    :root{
-      --bg:#ffffff; --text:#111827; --muted:#6b7280; --card:#ffffff; --card2:#fafafa; --line:#e5e7eb;
-      --amber:#f59e0b; --amber2:#fcd34d; --amberSoft:#fffbeb; --danger:#dc2626; --success:#10b981;
-      --hero1:#18181b; --hero2:#27272a; --hero3:#3f3f46; --shadow:0 20px 40px rgba(0,0,0,.08);
+    body {
+      font-family: Arial;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    body.theme-dark{
-      --bg:#09090b; --text:#f4f4f5; --muted:#d4d4d8; --card:#18181b; --card2:#111111; --line:#27272a;
-      --amber:#fbbf24; --amber2:#f59e0b; --amberSoft:rgba(245,158,11,.08); --hero1:#09090b; --hero2:#111827; --hero3:#000000;
-      --shadow:0 20px 40px rgba(0,0,0,.28);
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      width: 320px;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-    .page{min-height:100vh;padding:12px;background:linear-gradient(135deg, color-mix(in srgb,var(--bg) 96%, #f4f4f5), color-mix(in srgb,var(--bg) 92%, #fffbeb), color-mix(in srgb,var(--bg) 96%, #f4f4f5))}
-    .app{max-width:1120px;margin:0 auto}
-    .hero{margin-bottom:18px;border-radius:30px;padding:20px;color:#fff;background:linear-gradient(135deg,var(--hero1),var(--hero2),var(--hero3));box-shadow:var(--shadow)}
-    .hero-top{display:flex;flex-direction:column;gap:16px}
-    .hero h1{margin:0;font-size:30px;line-height:1.1}
-    .hero p{margin:6px 0 0;color:#d4d4d8;font-size:14px}
-    .hero-sub{display:flex;align-items:center;gap:8px;color:#d4d4d8;font-size:14px;margin-bottom:8px}
-    .hero-right{display:flex;flex-wrap:wrap;gap:8px}
-    .hero-badge,.ghost{min-height:46px;padding:10px 14px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.14)}
-    .login-shell{min-height:100vh;display:grid;place-items:center;padding:16px}
-    .login-card{width:min(520px,100%);background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:32px;padding:24px;box-shadow:var(--shadow)}
-    .login-card h1{margin:0 0 8px;font-size:32px}
-    .login-card p{margin:0;color:var(--muted)}
-    .top-actions{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:18px}
-    .search-wrap{position:relative}
-    .search-wrap input{padding-left:46px}
-    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#9ca3af}
-    .letters{display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-    .letter{padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#e5e7eb;color:#9ca3af}
-    .letter.active{background:#18181b;color:#fff}
-    input,textarea,button{font:inherit}
-    input,textarea{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;outline:none;padding:14px 16px;transition:all .25s ease;box-shadow:0 4px 14px rgba(0,0,0,.04)}
-    textarea{min-height:170px;resize:vertical;line-height:1.6}
-    input:focus,textarea:focus{border-color:var(--amber);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
-    button,.btn-label{min-height:46px;padding:10px 14px;border-radius:18px;border:1px solid var(--line);cursor:pointer;background:var(--card);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation}
-    button.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--amber),var(--amber2));box-shadow:0 10px 24px rgba(245,158,11,.28);font-weight:700}
-    button.outline-amber{border-color:#fcd34d}
-    button.danger{border-color:#fecaca;color:#dc2626}
-    .list{display:grid;gap:18px}
-    .card{border-radius:30px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));background:var(--card);box-shadow:var(--shadow);overflow:hidden}
-    .card.highlight{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.2), var(--shadow)}
-    .card-head{padding:22px 22px 12px}
-    .card-head-top{display:flex;flex-direction:column;gap:14px}
-    .main{display:flex;gap:14px;align-items:flex-start;min-width:0}
-    .avatar{width:64px;height:64px;flex:0 0 auto;border-radius:18px;object-fit:cover;border:1px solid color-mix(in srgb,var(--amber) 35%, var(--line));background:linear-gradient(135deg,#fef3c7,#fff7ed);display:flex;align-items:center;justify-content:center;color:#b45309;font-weight:800}
-    .avatar.large{width:80px;height:80px}.avatar.compact{width:56px;height:56px}
-    .meta{min-width:0}
-    .eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:8px}
-    .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text)}
-    .title.normal{font-size:24px}.title.large{font-size:30px}.title.compact{font-size:20px}
-    .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#fef3c7;color:#92400e}
-    .pill.dark{background:#18181b;color:#fff}
-    .card-body{padding:0 22px 22px;display:grid}
-    .card-body.compact{gap:12px}.card-body.normal{gap:16px}.card-body.large{gap:20px}
-    .contacts{display:grid;gap:12px}
-    .contact{min-height:48px;border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px;background:var(--card2);color:#52525b}
-    .contact.active{background:var(--amberSoft);color:#b45309;box-shadow:inset 0 0 0 1px rgba(245,158,11,.25);font-weight:700}
-    .contact-right{margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af}
-    .mix{border-radius:22px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));background:linear-gradient(135deg,#fffbeb,#fff7ed)}
-    .mix-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
-    .mix-title{display:flex;align-items:center;gap:8px;font-weight:700}
-    .mix-text{white-space:pre-wrap;font-size:14px;line-height:1.65;color:#3f3f46}
-    .item-actions{display:flex;flex-direction:column;gap:10px;padding:0 6px 6px}
-    .empty{border-radius:28px;padding:34px;text-align:center;background:var(--card);border:1px dashed var(--line);color:var(--muted)}
-    .toast{position:fixed;top:14px;right:14px;z-index:100;display:none;align-items:center;gap:8px;background:var(--success);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:700}
-    .toast.show{display:flex}
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:90}
-    .overlay.open{display:flex}
-    .panel{width:min(980px,100%);max-height:92vh;overflow:auto;background:var(--card);color:var(--text);border-radius:30px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.22);border:1px solid color-mix(in srgb,var(--line) 80%, transparent)}
-    .panel.small{width:min(470px,100%)} .panel h2{margin:0 0 16px;font-size:28px}
-    .form-grid{display:grid;gap:20px}.two-col{display:grid;grid-template-columns:1fr;gap:16px}
-    .photo-box{display:flex;flex-direction:column;align-items:flex-start;gap:14px;background:var(--card2);padding:16px;border-radius:22px}
-    .photo-actions{display:flex;flex-wrap:wrap;gap:10px}
-    .field-group{display:grid;gap:10px}.choice-grid{display:grid;grid-template-columns:1fr;gap:12px}
-    .choice{min-height:96px;padding:16px;border-radius:22px;text-align:left;border:1px solid var(--line);background:var(--card)}
-    .choice.active{border-color:var(--amber);background:var(--amberSoft);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
-    .choice-title{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}
-    .choice-desc{font-size:14px;color:var(--muted);line-height:1.5}
-    .toggle{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border-radius:22px;padding:16px;border:1px solid var(--line);background:var(--card)}
-    .toggle.active{background:#18181b;color:#fff;border-color:#18181b}
-    .toggle .desc{font-size:14px;color:var(--muted)} .toggle.active .desc{color:#d4d4d8}
-    .modal-actions{display:flex;flex-direction:column-reverse;gap:12px;margin-top:20px}
-    .settings-box{border:1px solid var(--line);background:var(--card2);border-radius:22px;padding:16px}
-    .settings-title{font-weight:700;margin-bottom:8px}.small-muted{font-size:14px;color:var(--muted)} .hidden{display:none!important}
-    @media (min-width:640px){
-      .page{padding:16px}.hero{padding:24px}.hero-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.top-actions{grid-template-columns:1fr auto}
-      .card-head-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.contacts{grid-template-columns:1fr 1fr}
-      .item-actions{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}.two-col{grid-template-columns:1fr 1fr}.choice-grid{grid-template-columns:1fr 1fr}.modal-actions{flex-direction:row;justify-content:flex-end}
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
     }
-    @media (min-width:768px){.letters{display:flex}}
+
+    button {
+      background: orange;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ff9900;
+    }
+
+    #app { display: none; }
+
+    .customer {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
   </style>
 </head>
-<body class="theme-system">
-  <div id="toast" class="toast">✅ Gespeichert</div>
 
-  <div id="loginView" class="login-shell">
-    <div class="login-card">
-      <div class="hero-sub">☁️ HairBase Team</div>
-      <h1>Salon-Anmeldung</h1>
-      <p>Mit eurem gemeinsamen Team-Login melden sich alle Geräte an.</p>
-      <div class="form-grid" style="margin-top:20px">
-        <div class="field-group">
-          <label class="small-muted">E-Mail</label>
-          <input id="loginEmail" type="email" placeholder="z. B. salon@hairbase.de" />
-        </div>
-        <div class="field-group">
-          <label class="small-muted">Passwort</label>
-          <input id="loginPassword" type="password" placeholder="Passwort" />
-        </div>
-        <div id="loginMessage" class="small-muted"></div>
-        <div class="modal-actions" style="margin-top:0">
-          <button id="loginBtn" class="primary" type="button">Anmelden</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<body>
 
-  <div id="appView" class="hidden">
-    <div class="page">
-      <div class="app">
-        <section class="hero">
-          <div class="hero-top">
-            <div>
-              <div class="hero-sub">👥 HairBase Team</div>
-              <h1>Kundenkartei</h1>
-              <p id="userInfo">Cloud-Sync aktiv</p>
-            </div>
-            <div class="hero-right">
-              <input id="fileInput" type="file" accept="application/json" class="hidden" />
-              <button id="syncBtn" class="ghost" type="button">☁️ Sync</button>
-              <button id="exportBtn" class="ghost" type="button">⬇️ Backup</button>
-              <button id="importBtn" class="ghost" type="button">⬆️ Import</button>
-              <button id="settingsBtn" class="ghost" type="button">⚙️ Einstellungen</button>
-              <button id="logoutBtn" class="ghost" type="button">↩️ Logout</button>
-              <div id="countBadge" class="hero-badge">0 Kunden</div>
-            </div>
-          </div>
-        </section>
+<!-- LOGIN -->
+<div class="card" id="login">
+  <h2>Salon Login</h2>
+  <input id="email" type="email" placeholder="E-Mail" />
+  <input id="password" type="password" placeholder="Passwort" />
+  <button onclick="login()">Anmelden</button>
+  <div id="msg"></div>
+</div>
 
-        <section class="top-actions">
-          <div class="search-wrap">
-            <span class="search-icon">🔎</span>
-            <input id="searchInput" type="text" placeholder="Suchen nach Name, Nummer, Mitarbeiter, Mischung oder Stammkunde" />
-          </div>
-          <button id="newBtn" class="primary" type="button">＋ Neuer Kunde</button>
-        </section>
+<!-- APP -->
+<div class="card" id="app">
+  <h2>Kunden</h2>
+  <div id="customers"></div>
 
-        <section id="letters" class="letters"></section>
-        <section id="customers" class="list"></section>
-      </div>
-    </div>
-  </div>
+  <input id="newName" placeholder="Neuer Kunde (Name)" />
+  <button onclick="addCustomer()">Speichern</button>
+</div>
 
-  <div id="settingsOverlay" class="overlay">
-    <div class="panel small">
-      <h2>⚙️ Einstellungen</h2>
-      <div class="form-grid">
-        <div class="settings-box">
-          <div class="settings-title">Standard Mitarbeiter</div>
-          <input id="defaultEmployee" placeholder="z.B. Anna" />
-        </div>
-        <div class="settings-box">
-          <div class="settings-title">Farbstil</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <button type="button" class="theme-btn" data-theme="system">System</button>
-            <button type="button" class="theme-btn" data-theme="dark">Dunkel</button>
-            <button type="button" class="theme-btn" data-theme="contrast">Hoher Kontrast</button>
-          </div>
-        </div>
-        <div class="settings-box">
-          <div class="settings-title">Kartenansicht</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <button type="button" class="size-btn" data-size="compact">Kompakt</button>
-            <button type="button" class="size-btn" data-size="normal">Normal</button>
-            <button type="button" class="size-btn" data-size="large">Groß</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-actions"><button id="settingsClose" type="button">Fertig</button></div>
-    </div>
-  </div>
+<script>
+  const supabaseClient = supabase.createClient(
+    "https://rgvjhcmeclnautmwiseo.supabase.co",
+    "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux"
+  );
 
-  <div id="formOverlay" class="overlay">
-    <div class="panel">
-      <h2 id="formTitle">Neuen Kunden anlegen</h2>
-      <div class="form-grid">
-        <div class="photo-box">
-          <div id="avatarPreview"></div>
-          <div class="photo-actions">
-            <label class="btn-label">📷 Kamera<input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" /></label>
-            <label class="btn-label">🖼️ Mediathek<input id="galleryInput" type="file" accept="image/*" class="hidden" /></label>
-            <button id="removePhotoBtn" type="button">Foto entfernen</button>
-          </div>
-        </div>
+  async function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
 
-        <div class="two-col">
-          <div class="field-group"><label class="small-muted">Vorname</label><input id="firstName" /></div>
-          <div class="field-group"><label class="small-muted">Nachname</label><input id="lastName" /></div>
-        </div>
+    msg.innerText = "Lade...";
 
-        <div class="two-col">
-          <div class="field-group"><label class="small-muted">Mobil</label><input id="mobile" type="tel" inputmode="tel" /></div>
-          <div class="field-group"><label class="small-muted">Festnetz</label><input id="phone" type="tel" inputmode="tel" /></div>
-        </div>
-
-        <div class="field-group"><label class="small-muted">Mitarbeiter</label><input id="employee" placeholder="Zum Beispiel: Anna" /></div>
-
-        <div class="field-group">
-          <label class="small-muted">Bevorzugte Nummer</label>
-          <div class="choice-grid">
-            <button id="prefMobile" type="button" class="choice">
-              <div class="choice-title">📱 Mobil <span id="starMobile" class="hidden">⭐</span></div>
-              <div class="choice-desc">Diese Nummer wird in der Schnellansicht bevorzugt angezeigt.</div>
-            </button>
-            <button id="prefPhone" type="button" class="choice">
-              <div class="choice-title">☎️ Festnetz <span id="starPhone" class="hidden">⭐</span></div>
-              <div class="choice-desc">Ideal, wenn der Kunde lieber über Festnetz erreichbar ist.</div>
-            </button>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label class="small-muted">Letzte Mischung</label>
-          <textarea id="lastMix" placeholder="Zum Beispiel: Ansatz 6/0 + 6/7, 6% Oxidant. Längen Gloss 9/16 + Clear."></textarea>
-          <div><button id="copyMixBtn" type="button" class="outline-amber">📋 Mischung kopieren</button></div>
-        </div>
-
-        <div class="field-group">
-          <label class="small-muted">Zusatz</label>
-          <button id="regularBtn" type="button" class="toggle">
-            <span>⭐</span>
-            <div>
-              <div style="font-weight:700">Stammkunde</div>
-              <div class="desc">Optional markieren, falls dieser Kunde besonders häufig kommt.</div>
-            </div>
-          </button>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button id="cancelBtn" type="button">Abbrechen</button>
-        <button id="saveBtn" type="button" class="primary">Speichern</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteOverlay" class="overlay">
-    <div class="panel small">
-      <h2>Kunde wirklich löschen?</h2>
-      <p class="small-muted" style="margin-top:0">Dieser Eintrag wird aus der Kundenkartei entfernt. Das kann nicht rückgängig gemacht werden.</p>
-      <div class="modal-actions">
-        <button id="deleteCancelBtn" type="button">Abbrechen</button>
-        <button id="deleteConfirmBtn" type="button" class="danger">Löschen</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const SUPABASE_URL = 'https://rgvjhcmeclnautmwiseo.sbClient.co';
-    const SUPABASE_KEY = 'sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux';
-    const supa = window.supabase;
-    const sbClient = window.sbClient.createClient(SUPABASE_URL, SUPABASE_KEY); supa.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const SETTINGS_KEY = 'hairbase_team_settings_v2';
-    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const DEFAULT_SETTINGS = { defaultEmployee: '', theme: 'system', cardSize: 'normal', showRegularsFirst: true };
-
-    let user = null;
-    let customers = [];
-    let searchTerm = '';
-    let editingId = null;
-    let deleteId = null;
-    let highlightId = null;
-    let formState = createEmptyCustomer();
-    let settings = loadSettings();
-
-    const els = {
-      body: document.body, toast: document.getElementById('toast'),
-      loginView: document.getElementById('loginView'), appView: document.getElementById('appView'),
-      loginEmail: document.getElementById('loginEmail'), loginPassword: document.getElementById('loginPassword'),
-      loginBtn: document.getElementById('loginBtn'), loginMessage: document.getElementById('loginMessage'),
-      userInfo: document.getElementById('userInfo'), countBadge: document.getElementById('countBadge'),
-      searchInput: document.getElementById('searchInput'), newBtn: document.getElementById('newBtn'),
-      letters: document.getElementById('letters'), customersEl: document.getElementById('customers'),
-      syncBtn: document.getElementById('syncBtn'), exportBtn: document.getElementById('exportBtn'),
-      importBtn: document.getElementById('importBtn'), settingsBtn: document.getElementById('settingsBtn'),
-      logoutBtn: document.getElementById('logoutBtn'), fileInput: document.getElementById('fileInput'),
-      settingsOverlay: document.getElementById('settingsOverlay'), settingsClose: document.getElementById('settingsClose'),
-      defaultEmployee: document.getElementById('defaultEmployee'),
-      formOverlay: document.getElementById('formOverlay'), formTitle: document.getElementById('formTitle'),
-      avatarPreview: document.getElementById('avatarPreview'), cameraInput: document.getElementById('cameraInput'),
-      galleryInput: document.getElementById('galleryInput'), removePhotoBtn: document.getElementById('removePhotoBtn'),
-      firstName: document.getElementById('firstName'), lastName: document.getElementById('lastName'),
-      mobile: document.getElementById('mobile'), phone: document.getElementById('phone'),
-      employee: document.getElementById('employee'), prefMobile: document.getElementById('prefMobile'),
-      prefPhone: document.getElementById('prefPhone'), starMobile: document.getElementById('starMobile'),
-      starPhone: document.getElementById('starPhone'), lastMix: document.getElementById('lastMix'),
-      copyMixBtn: document.getElementById('copyMixBtn'), regularBtn: document.getElementById('regularBtn'),
-      cancelBtn: document.getElementById('cancelBtn'), saveBtn: document.getElementById('saveBtn'),
-      deleteOverlay: document.getElementById('deleteOverlay'), deleteCancelBtn: document.getElementById('deleteCancelBtn'),
-      deleteConfirmBtn: document.getElementById('deleteConfirmBtn')
-    };
-
-    function createEmptyCustomer(defaultEmployee = '') {
-      return { id:'', firstName:'', lastName:'', phone:'', mobile:'', preferredContact:'mobile', employee:defaultEmployee, lastMix:'', photo:'', isRegular:false, updatedAt:new Date().toISOString() };
-    }
-    function loadSettings() {
-      try { const raw = localStorage.getItem(SETTINGS_KEY); return raw ? normalizeSettings(JSON.parse(raw)) : { ...DEFAULT_SETTINGS }; }
-      catch { return { ...DEFAULT_SETTINGS }; }
-    }
-    function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
-    function normalizeSettings(raw) {
-      return {
-        defaultEmployee: String((raw && raw.defaultEmployee) || ''),
-        theme: raw && ['system','dark','contrast'].includes(raw.theme) ? raw.theme : 'system',
-        cardSize: raw && ['compact','normal','large'].includes(raw.cardSize) ? raw.cardSize : 'normal',
-        showRegularsFirst: raw && raw.showRegularsFirst !== undefined ? raw.showRegularsFirst : true
-      };
-    }
-    function normalizeSearch(value) {
-      return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');
-    }
-    function formatPhoneNumber(value) {
-      const digits = String(value || '').replace(/\D/g,'').slice(0,11);
-      if (digits.length <= 4) return digits;
-      if (digits.length <= 7) return digits.replace(/(\d{4})(\d+)/,'$1 $2');
-      return digits.replace(/(\d{4})(\d{3})(\d+)/,'$1 $2 $3');
-    }
-    function toTitleCase(value) {
-      return String(value || '').toLowerCase().split(/(\s|-)/).map(part => {
-        if (part === ' ' || part === '-') return part;
-        return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
-      }).join('');
-    }
-    function rowToCustomer(row) {
-      return {
-        id: row.id, firstName: toTitleCase(row.first_name || ''), lastName: toTitleCase(row.last_name || ''),
-        phone: formatPhoneNumber(row.phone || ''), mobile: formatPhoneNumber(row.mobile || ''),
-        preferredContact: row.preferred_contact === 'phone' ? 'phone' : 'mobile',
-        employee: toTitleCase(row.employee || ''), lastMix: String(row.last_mix || ''),
-        photo: String(row.photo || ''), isRegular: Boolean(row.is_regular), updatedAt: row.updated_at
-      };
-    }
-    function customerToRow(customer) {
-      return {
-        owner_id: user.id, first_name: toTitleCase(customer.firstName), last_name: toTitleCase(customer.lastName),
-        phone: formatPhoneNumber(customer.phone), mobile: formatPhoneNumber(customer.mobile),
-        preferred_contact: customer.preferredContact, employee: toTitleCase(customer.employee),
-        last_mix: customer.lastMix.trim(), photo: customer.photo || null, is_regular: customer.isRegular,
-        updated_at: new Date().toISOString()
-      };
-    }
-    function applyTheme() {
-      els.body.classList.remove('theme-system','theme-dark','theme-contrast');
-      let theme = settings.theme;
-      if (theme === 'system') {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        theme = prefersDark ? 'dark' : 'system';
-      }
-      els.body.classList.add(theme === 'system' ? 'theme-system' : `theme-${theme}`);
-      updateSettingsUI();
-    }
-    function showToast(text='Gespeichert') {
-      els.toast.textContent = `✅ ${text}`;
-      els.toast.classList.add('show');
-      setTimeout(() => els.toast.classList.remove('show'), 1200);
-    }
-    async function copyText(text) {
-      if (!text) return;
-      try { await navigator.clipboard.writeText(text); showToast('Gespeichert'); } catch {}
-    }
-    function avatarHtml(src, fullName, sizeClass) {
-      if (src) return `<img src="${src}" alt="${escapeAttr(fullName)}" class="avatar ${sizeClass}" />`;
-      const initials = fullName.split(' ').map(p => p[0] || '').join('').slice(0,2).toUpperCase() || 'K';
-      return `<div class="avatar ${sizeClass}">${escapeHtml(initials)}</div>`;
-    }
-    function sortedCustomers() {
-      return customers.slice().sort((a,b) => {
-        if (settings.showRegularsFirst && a.isRegular !== b.isRegular) return a.isRegular ? -1 : 1;
-        return (`${a.lastName} ${a.firstName}`).toLowerCase().localeCompare((`${b.lastName} ${b.firstName}`).toLowerCase(), 'de');
-      });
-    }
-    function filteredCustomers() {
-      const q = normalizeSearch(searchTerm.trim());
-      if (!q) return sortedCustomers();
-      return sortedCustomers().filter(customer =>
-        normalizeSearch([customer.firstName,customer.lastName,customer.mobile,customer.phone,customer.lastMix,customer.preferredContact,customer.employee,customer.isRegular ? 'stammkunde' : ''].join(' ')).includes(q)
-      );
-    }
-    function renderLetters() {
-      const available = new Set(filteredCustomers().map(c => (c.lastName && c.lastName[0] ? c.lastName[0] : (c.firstName && c.firstName[0] ? c.firstName[0] : '#')).toUpperCase()));
-      els.letters.innerHTML = LETTERS.map(letter => `<span class="letter ${available.has(letter) ? 'active' : ''}">${letter}</span>`).join('');
-    }
-    function renderCustomers() {
-      const list = filteredCustomers();
-      els.countBadge.textContent = `${customers.length} Kunden`;
-      renderLetters();
-      if (!list.length) {
-        els.customersEl.innerHTML = `<div class="empty">Keine passenden Kunden gefunden.</div>`;
-        return;
-      }
-      const avatarClass = settings.cardSize === 'large' ? 'large' : settings.cardSize === 'compact' ? 'compact' : '';
-      const titleClass = settings.cardSize === 'large' ? 'large' : settings.cardSize === 'compact' ? 'compact' : 'normal';
-      const bodyClass = settings.cardSize;
-      els.customersEl.innerHTML = list.map(customer => `
-        <div>
-          <article class="card ${highlightId === customer.id ? 'highlight' : ''}">
-            <div class="card-head">
-              <div class="card-head-top">
-                <div class="main">
-                  ${avatarHtml(customer.photo, `${customer.firstName} ${customer.lastName}`, avatarClass)}
-                  <div class="meta">
-                    <div class="eyebrow">👁️ Schnellansicht ${customer.isRegular ? '<span class="pill dark">Stammkunde</span>' : ''}</div>
-                    <div class="title ${titleClass}">${escapeHtml(customer.firstName)} ${escapeHtml(customer.lastName)}</div>
-                    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
-                      <span class="pill">${customer.preferredContact === 'mobile' ? 'Bevorzugt: Mobil' : 'Bevorzugt: Festnetz'}</span>
-                      ${customer.employee ? `<span class="pill">🧑‍💼 ${escapeHtml(customer.employee)}</span>` : ''}
-                    </div>
-                  </div>
-                </div>
-                <button type="button" class="primary detail-btn" data-edit="${customer.id}">✏️ Details</button>
-              </div>
-            </div>
-            <div class="card-body ${bodyClass}">
-              <div class="contacts">
-                <div class="contact ${customer.preferredContact === 'mobile' ? 'active' : ''}">
-                  <span>📱</span><span>${escapeHtml(customer.mobile || '—')}</span>
-                  ${customer.preferredContact === 'mobile' ? '<span style="margin-left:auto">⭐</span>' : '<span class="contact-right">Mobil</span>'}
-                </div>
-                <div class="contact ${customer.preferredContact === 'phone' ? 'active' : ''}">
-                  <span>☎️</span><span>${escapeHtml(customer.phone || '—')}</span>
-                  ${customer.preferredContact === 'phone' ? '<span style="margin-left:auto">⭐</span>' : '<span class="contact-right">Festnetz</span>'}
-                </div>
-              </div>
-              <div class="mix">
-                <div class="mix-top">
-                  <div class="mix-title">✨ Letzte Mischung</div>
-                  <button type="button" class="outline-amber" data-copy-mix="${customer.id}" ${customer.lastMix ? '' : 'disabled'}>📋 Kopieren</button>
-                </div>
-                <div class="mix-text">${escapeHtml(customer.lastMix || 'Noch keine Mischung hinterlegt.')}</div>
-              </div>
-            </div>
-          </article>
-          <div class="item-actions">
-            <button type="button" class="outline-amber" data-copy-pref="${customer.id}">📋 Bevorzugte Nummer kopieren</button>
-            <button type="button" data-edit="${customer.id}">✏️ Bearbeiten</button>
-            <button type="button" class="danger" data-delete="${customer.id}">🗑️ Löschen</button>
-          </div>
-        </div>
-      `).join('');
-    }
-    function updateSettingsUI() {
-      els.defaultEmployee.value = settings.defaultEmployee;
-      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.toggle('primary', btn.dataset.theme === settings.theme));
-      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.toggle('primary', btn.dataset.size === settings.cardSize));
-    }
-    function syncFormToInputs() {
-      els.formTitle.textContent = editingId ? 'Kunde bearbeiten' : 'Neuen Kunden anlegen';
-      els.firstName.value = formState.firstName || '';
-      els.lastName.value = formState.lastName || '';
-      els.mobile.value = formState.mobile || '';
-      els.phone.value = formState.phone || '';
-      els.employee.value = formState.employee || '';
-      els.lastMix.value = formState.lastMix || '';
-      updateFormUI();
-    }
-    function syncInputsToForm() {
-      formState.firstName = toTitleCase(els.firstName.value);
-      formState.lastName = toTitleCase(els.lastName.value);
-      formState.mobile = formatPhoneNumber(els.mobile.value);
-      formState.phone = formatPhoneNumber(els.phone.value);
-      formState.employee = toTitleCase(els.employee.value);
-      formState.lastMix = els.lastMix.value.trim();
-      formState.updatedAt = new Date().toISOString();
-    }
-    function updateFormUI() {
-      els.prefMobile.classList.toggle('active', formState.preferredContact === 'mobile');
-      els.prefPhone.classList.toggle('active', formState.preferredContact === 'phone');
-      els.starMobile.classList.toggle('hidden', formState.preferredContact !== 'mobile');
-      els.starPhone.classList.toggle('hidden', formState.preferredContact !== 'phone');
-      els.regularBtn.classList.toggle('active', !!formState.isRegular);
-      els.copyMixBtn.disabled = !formState.lastMix;
-      els.removePhotoBtn.style.display = formState.photo ? 'inline-flex' : 'none';
-      els.avatarPreview.innerHTML = avatarHtml(formState.photo, `${formState.firstName} ${formState.lastName}`, 'large');
-    }
-    function openOverlay(el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeOverlay(el) { el.classList.remove('open'); document.body.style.overflow = ''; }
-
-    async function loadCustomers() {
-      if (!user) return;
-      const { data, error } = await sbClient.from('customers').select('*').order('updated_at', { ascending: false });
-      if (!error && data) { customers = data.map(rowToCustomer); renderCustomers(); }
-    }
-
-    async function login(ev) {
-      if (ev) ev.preventDefault();
-      const email = els.loginEmail.value.trim();
-      const password = els.loginPassword.value;
-      if (!email || !password) {
-        els.loginMessage.textContent = 'Bitte E-Mail und Passwort eingeben.';
-        return;
-      }
-      els.loginBtn.disabled = true;
-      els.loginMessage.textContent = 'Anmeldung läuft...';
-      try {
-        const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          els.loginMessage.textContent = error.message;
-          return;
-        }
-        user = data.user;
-        els.loginMessage.textContent = '';
-        await afterLogin();
-      } catch (err) {
-        els.loginMessage.textContent = 'Login fehlgeschlagen.';
-      } finally {
-        els.loginBtn.disabled = false;
-      }
-    }
-
-    async function afterLogin() {
-      els.loginView.classList.add('hidden');
-      els.appView.classList.remove('hidden');
-      els.userInfo.textContent = `Cloud-Sync aktiv – ${user.email}`;
-      await loadCustomers();
-    }
-
-    async function logout() {
-      await sbClient.auth.signOut();
-      user = null; customers = [];
-      els.appView.classList.add('hidden');
-      els.loginView.classList.remove('hidden');
-      renderCustomers();
-    }
-
-    function newCustomer() {
-      editingId = null;
-      formState = createEmptyCustomer(settings.defaultEmployee);
-      syncFormToInputs();
-      openOverlay(els.formOverlay);
-    }
-
-    function editCustomer(id) {
-      const customer = customers.find(c => c.id === id);
-      if (!customer) return;
-      editingId = id;
-      formState = JSON.parse(JSON.stringify(customer));
-      syncFormToInputs();
-      openOverlay(els.formOverlay);
-    }
-
-    async function saveCustomer() {
-      syncInputsToForm();
-      const normalized = {
-        ...formState,
-        firstName: toTitleCase(formState.firstName),
-        lastName: toTitleCase(formState.lastName),
-        phone: formatPhoneNumber(formState.phone),
-        mobile: formatPhoneNumber(formState.mobile),
-        employee: toTitleCase(formState.employee),
-        updatedAt: new Date().toISOString()
-      };
-      if (!normalized.firstName || !normalized.lastName) return;
-
-      if (editingId) {
-        const { data, error } = await sbClient.from('customers').update(customerToRow(normalized)).eq('id', editingId).select().single();
-        if (!error && data) {
-          const customer = rowToCustomer(data);
-          customers = customers.map(c => c.id === editingId ? customer : c);
-          highlightId = editingId;
-        }
-      } else {
-        const { data, error } = await sbClient.from('customers').insert(customerToRow(normalized)).select().single();
-        if (!error && data) {
-          const customer = rowToCustomer(data);
-          customers = [customer, ...customers];
-          highlightId = customer.id;
-        }
-      }
-      renderCustomers();
-      closeOverlay(els.formOverlay);
-      editingId = null;
-      formState = createEmptyCustomer(settings.defaultEmployee);
-      showToast('Gespeichert');
-      setTimeout(() => { highlightId = null; renderCustomers(); }, 1800);
-    }
-
-    function askDelete(id) { deleteId = id; openOverlay(els.deleteOverlay); }
-
-    async function confirmDelete() {
-      if (!deleteId) return;
-      const { error } = await sbClient.from('customers').delete().eq('id', deleteId);
-      if (!error) {
-        customers = customers.filter(c => c.id !== deleteId);
-        renderCustomers();
-        deleteId = null;
-        closeOverlay(els.deleteOverlay);
-        showToast('Gelöscht');
-      }
-    }
-
-    function exportBackup() {
-      const payload = { app:'HairBase Team', exportedAt:new Date().toISOString(), customers, settings };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `hairbase-team-backup-${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('Backup exportiert');
-    }
-
-    async function importBackup(file) {
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        const importedCustomers = Array.isArray(parsed) ? parsed : Array.isArray(parsed.customers) ? parsed.customers : [];
-        if (!importedCustomers.length) return;
-        const rows = importedCustomers.map(c => customerToRow(c));
-        const { error } = await sbClient.from('customers').insert(rows);
-        if (!error) { await loadCustomers(); showToast('Import fertig'); }
-      } catch {}
-    }
-
-    function handleImage(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => { formState.photo = String(reader.result || ''); updateFormUI(); };
-      reader.readAsDataURL(file);
-    }
-
-    function escapeHtml(str) {
-      return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
-    }
-    function escapeAttr(str) { return escapeHtml(str).replaceAll("'", '&#39;'); }
-
-    document.getElementById('loginBtn').addEventListener('click', login);
-    els.loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(e); });
-    els.loginEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(e); });
-
-    els.searchInput.addEventListener('input', e => { searchTerm = e.target.value || ''; renderCustomers(); });
-    els.newBtn.addEventListener('click', newCustomer);
-    els.syncBtn.addEventListener('click', loadCustomers);
-    els.exportBtn.addEventListener('click', exportBackup);
-    els.importBtn.addEventListener('click', () => els.fileInput.click());
-    els.fileInput.addEventListener('change', e => importBackup(e.target.files && e.target.files[0]));
-    els.settingsBtn.addEventListener('click', () => { updateSettingsUI(); openOverlay(els.settingsOverlay); });
-    els.logoutBtn.addEventListener('click', logout);
-    els.settingsClose.addEventListener('click', () => { saveSettings(); applyTheme(); renderCustomers(); closeOverlay(els.settingsOverlay); });
-    els.defaultEmployee.addEventListener('input', e => { settings.defaultEmployee = toTitleCase(e.target.value); });
-    document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => { settings.theme = btn.dataset.theme; updateSettingsUI(); applyTheme(); }));
-    document.querySelectorAll('.size-btn').forEach(btn => btn.addEventListener('click', () => { settings.cardSize = btn.dataset.size; updateSettingsUI(); renderCustomers(); }));
-    els.cancelBtn.addEventListener('click', () => closeOverlay(els.formOverlay));
-    els.saveBtn.addEventListener('click', saveCustomer);
-    els.mobile.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); formState.mobile = e.target.value; });
-    els.phone.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); formState.phone = e.target.value; });
-    els.lastMix.addEventListener('input', e => { formState.lastMix = e.target.value; updateFormUI(); });
-    els.copyMixBtn.addEventListener('click', () => copyText(els.lastMix.value));
-    els.prefMobile.addEventListener('click', () => { formState.preferredContact = 'mobile'; updateFormUI(); });
-    els.prefPhone.addEventListener('click', () => { formState.preferredContact = 'phone'; updateFormUI(); });
-    els.regularBtn.addEventListener('click', () => { formState.isRegular = !formState.isRegular; updateFormUI(); });
-    els.cameraInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
-    els.galleryInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
-    els.removePhotoBtn.addEventListener('click', () => { formState.photo = ''; updateFormUI(); });
-    els.deleteCancelBtn.addEventListener('click', () => closeOverlay(els.deleteOverlay));
-    els.deleteConfirmBtn.addEventListener('click', confirmDelete);
-
-    [els.settingsOverlay, els.formOverlay, els.deleteOverlay].forEach(overlay => {
-      overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(overlay); });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
     });
 
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('[data-edit],[data-delete],[data-copy-pref],[data-copy-mix]');
-      if (!target) return;
-      e.preventDefault();
-      if (target.dataset.edit) editCustomer(target.dataset.edit);
-      else if (target.dataset.delete) askDelete(target.dataset.delete);
-      else if (target.dataset.copyPref) {
-        const c = customers.find(x => x.id === target.dataset.copyPref);
-        if (c) copyText(c.preferredContact === 'mobile' ? c.mobile : c.phone);
-      } else if (target.dataset.copyMix) {
-        const c = customers.find(x => x.id === target.dataset.copyMix);
-        if (c) copyText(c.lastMix);
-      }
-    }, { passive:false });
-
-    async function init() {
-      applyTheme();
-      updateSettingsUI();
-      try {
-        const { data } = await sbClient.auth.getSession();
-        if (data && data.session && data.session.user) {
-          user = data.session.user;
-          await afterLogin();
-        }
-      } catch {}
+    if (error) {
+      msg.innerText = "Fehler: " + error.message;
+    } else {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      loadCustomers();
     }
-    init();
-  </script>
+  }
+
+  async function loadCustomers() {
+    const { data, error } = await supabaseClient
+      .from("customers")
+      .select("*");
+
+    const container = document.getElementById("customers");
+    container.innerHTML = "";
+
+    if (data) {
+      data.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "customer";
+        div.innerText = c.first_name || c.name || "Kunde";
+        container.appendChild(div);
+      });
+    }
+  }
+
+  async function addCustomer() {
+    const name = document.getElementById("newName").value;
+
+    await supabaseClient.from("customers").insert([
+      { first_name: name }
+    ]);
+
+    document.getElementById("newName").value = "";
+    loadCustomers();
+  }
+</script>
+
 </body>
 </html>
