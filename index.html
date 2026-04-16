@@ -178,9 +178,14 @@
 
       appMsg.innerText = "Speichere...";
 
-      const { error } = await supabaseClient
-        .from("customers")
-        .insert([{ first_name: name }]);
+     const { data: { user } } = await supabaseClient.auth.getUser();
+
+await supabaseClient
+  .from("customers")
+  .insert([{
+    first_name: name,
+    owner_id: user.id
+  }]);
 
       if (error) {
         appMsg.innerText = "Fehler beim Speichern: " + error.message;
