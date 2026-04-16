@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="theme-color" content="#18181b" />
-  <title>HairBase Team</title>
+  <title>HairBase Team Login Fix</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
@@ -19,41 +19,20 @@
       --amber:#fbbf24; --amber2:#f59e0b; --amberSoft:rgba(245,158,11,.08); --hero1:#09090b; --hero2:#111827; --hero3:#000000;
       --shadow:0 20px 40px rgba(0,0,0,.28);
     }
-    body.theme-contrast{
-      --bg:#000000; --text:#ffffff; --muted:#e5e7eb; --card:#111111; --card2:#0a0a0a; --line:#ffffff;
-      --amber:#ffd000; --amber2:#ffb000; --amberSoft:#1a1200; --hero1:#000000; --hero2:#000000; --hero3:#000000; --shadow:none;
-    }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;padding:0}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
-      transition:background-color .35s ease,color .35s ease;
-    }
-    .page{
-      min-height:100vh; padding:12px;
-      background:linear-gradient(135deg, color-mix(in srgb,var(--bg) 96%, #f4f4f5), color-mix(in srgb,var(--bg) 92%, #fffbeb), color-mix(in srgb,var(--bg) 96%, #f4f4f5));
-      transition:background .35s ease;
-    }
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    .page{min-height:100vh;padding:12px;background:linear-gradient(135deg, color-mix(in srgb,var(--bg) 96%, #f4f4f5), color-mix(in srgb,var(--bg) 92%, #fffbeb), color-mix(in srgb,var(--bg) 96%, #f4f4f5))}
     .app{max-width:1120px;margin:0 auto}
-    .hero{
-      margin-bottom:18px; border-radius:30px; padding:20px; color:#fff;
-      background:linear-gradient(135deg,var(--hero1),var(--hero2),var(--hero3)); box-shadow:var(--shadow);
-    }
+    .hero{margin-bottom:18px;border-radius:30px;padding:20px;color:#fff;background:linear-gradient(135deg,var(--hero1),var(--hero2),var(--hero3));box-shadow:var(--shadow)}
     .hero-top{display:flex;flex-direction:column;gap:16px}
     .hero h1{margin:0;font-size:30px;line-height:1.1}
     .hero p{margin:6px 0 0;color:#d4d4d8;font-size:14px}
     .hero-sub{display:flex;align-items:center;gap:8px;color:#d4d4d8;font-size:14px;margin-bottom:8px}
     .hero-right{display:flex;flex-wrap:wrap;gap:8px}
-    .hero-badge,.ghost{
-      min-height:46px; padding:10px 14px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      background:rgba(255,255,255,.10); color:#fff; border:1px solid rgba(255,255,255,.14)
-    }
+    .hero-badge,.ghost{min-height:46px;padding:10px 14px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.14)}
     .login-shell{min-height:100vh;display:grid;place-items:center;padding:16px}
-    .login-card{
-      width:min(520px,100%); background:var(--card); color:var(--text); border:1px solid var(--line);
-      border-radius:32px; padding:24px; box-shadow:var(--shadow)
-    }
+    .login-card{width:min(520px,100%);background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:32px;padding:24px;box-shadow:var(--shadow)}
     .login-card h1{margin:0 0 8px;font-size:32px}
     .login-card p{margin:0;color:var(--muted)}
     .top-actions{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:18px}
@@ -63,119 +42,60 @@
     .letters{display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px}
     .letter{padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#e5e7eb;color:#9ca3af}
     .letter.active{background:#18181b;color:#fff}
-    body.theme-dark .letter{background:#18181b;color:#71717a}
-    body.theme-dark .letter.active{background:#f4f4f5;color:#09090b}
-    body.theme-contrast .letter{background:#222;color:#999;border:1px solid #fff}
-    body.theme-contrast .letter.active{background:#fff;color:#000}
     input,textarea,button{font:inherit}
-    input,textarea{
-      width:100%; background:var(--card); color:var(--text); border:1px solid var(--line);
-      border-radius:18px; outline:none; padding:14px 16px; transition:all .25s ease;
-      box-shadow:0 4px 14px rgba(0,0,0,.04);
-    }
+    input,textarea{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;outline:none;padding:14px 16px;transition:all .25s ease;box-shadow:0 4px 14px rgba(0,0,0,.04)}
     textarea{min-height:170px;resize:vertical;line-height:1.6}
-    input:focus,textarea:focus{border-color:var(--amber); box-shadow:0 0 0 4px rgba(245,158,11,.12)}
-    button,.btn-label{
-      min-height:46px; padding:10px 14px; border-radius:18px; border:1px solid var(--line); cursor:pointer;
-      background:var(--card); color:var(--text); display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      transition:transform .15s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
-      touch-action:manipulation;
-    }
-    button:active,.btn-label:active{transform:scale(.985)}
+    input:focus,textarea:focus{border-color:var(--amber);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+    button,.btn-label{min-height:46px;padding:10px 14px;border-radius:18px;border:1px solid var(--line);cursor:pointer;background:var(--card);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:8px;touch-action:manipulation}
     button.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--amber),var(--amber2));box-shadow:0 10px 24px rgba(245,158,11,.28);font-weight:700}
     button.outline-amber{border-color:#fcd34d}
-    button.outline-amber:hover{background:var(--amberSoft)}
     button.danger{border-color:#fecaca;color:#dc2626}
     .list{display:grid;gap:18px}
-    .card{
-      border-radius:30px; border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));
-      background:var(--card); box-shadow:var(--shadow); overflow:hidden; transition:all .25s ease;
-    }
-    .card.highlight{border-color:var(--amber); box-shadow:0 0 0 3px rgba(245,158,11,.2), var(--shadow)}
+    .card{border-radius:30px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));background:var(--card);box-shadow:var(--shadow);overflow:hidden}
+    .card.highlight{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.2), var(--shadow)}
     .card-head{padding:22px 22px 12px}
     .card-head-top{display:flex;flex-direction:column;gap:14px}
     .main{display:flex;gap:14px;align-items:flex-start;min-width:0}
-    .avatar{
-      width:64px;height:64px;flex:0 0 auto;border-radius:18px;object-fit:cover;
-      border:1px solid color-mix(in srgb,var(--amber) 35%, var(--line));
-      background:linear-gradient(135deg,#fef3c7,#fff7ed);display:flex;align-items:center;justify-content:center;
-      color:#b45309;font-weight:800;
-    }
+    .avatar{width:64px;height:64px;flex:0 0 auto;border-radius:18px;object-fit:cover;border:1px solid color-mix(in srgb,var(--amber) 35%, var(--line));background:linear-gradient(135deg,#fef3c7,#fff7ed);display:flex;align-items:center;justify-content:center;color:#b45309;font-weight:800}
     .avatar.large{width:80px;height:80px}.avatar.compact{width:56px;height:56px}
     .meta{min-width:0}
     .eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:8px}
     .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text)}
     .title.normal{font-size:24px}.title.large{font-size:30px}.title.compact{font-size:20px}
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;
-      background:#fef3c7;color:#92400e
-    }
-    body.theme-dark .pill{background:rgba(245,158,11,.14);color:#fde68a}
-    body.theme-contrast .pill{background:#222;color:#fff;border:1px solid #fff}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#fef3c7;color:#92400e}
     .pill.dark{background:#18181b;color:#fff}
-    body.theme-dark .pill.dark{background:#3f3f46}
     .card-body{padding:0 22px 22px;display:grid}
     .card-body.compact{gap:12px}.card-body.normal{gap:16px}.card-body.large{gap:20px}
     .contacts{display:grid;gap:12px}
-    .contact{
-      min-height:48px;border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px;
-      background:var(--card2);color:#52525b
-    }
-    body.theme-dark .contact{color:#d4d4d8}
+    .contact{min-height:48px;border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px;background:var(--card2);color:#52525b}
     .contact.active{background:var(--amberSoft);color:#b45309;box-shadow:inset 0 0 0 1px rgba(245,158,11,.25);font-weight:700}
-    body.theme-dark .contact.active{color:#fde68a}
     .contact-right{margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af}
-    .mix{
-      border-radius:22px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));
-      background:linear-gradient(135deg,#fffbeb,#fff7ed)
-    }
-    body.theme-dark .mix{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(9,9,11,.96))}
-    body.theme-contrast .mix{background:#111;border-color:#fff}
+    .mix{border-radius:22px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));background:linear-gradient(135deg,#fffbeb,#fff7ed)}
     .mix-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
     .mix-title{display:flex;align-items:center;gap:8px;font-weight:700}
     .mix-text{white-space:pre-wrap;font-size:14px;line-height:1.65;color:#3f3f46}
-    body.theme-dark .mix-text{color:#d4d4d8}
     .item-actions{display:flex;flex-direction:column;gap:10px;padding:0 6px 6px}
     .empty{border-radius:28px;padding:34px;text-align:center;background:var(--card);border:1px dashed var(--line);color:var(--muted)}
-    .toast{
-      position:fixed;top:14px;right:14px;z-index:100;display:none;align-items:center;gap:8px;background:var(--success);color:#fff;
-      padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:700
-    }
+    .toast{position:fixed;top:14px;right:14px;z-index:100;display:none;align-items:center;gap:8px;background:var(--success);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:700}
     .toast.show{display:flex}
-    .overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,.42); display:none; align-items:flex-end; justify-content:center; padding:12px; z-index:90
-    }
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:90}
     .overlay.open{display:flex}
-    .panel{
-      width:min(980px,100%); max-height:92vh; overflow:auto; background:var(--card); color:var(--text);
-      border-radius:30px; padding:20px; box-shadow:0 24px 60px rgba(0,0,0,.22); border:1px solid color-mix(in srgb,var(--line) 80%, transparent);
-    }
-    .panel.small{width:min(470px,100%)}
-    .panel h2{margin:0 0 16px;font-size:28px}
-    .form-grid{display:grid;gap:20px}
-    .two-col{display:grid;grid-template-columns:1fr;gap:16px}
+    .panel{width:min(980px,100%);max-height:92vh;overflow:auto;background:var(--card);color:var(--text);border-radius:30px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.22);border:1px solid color-mix(in srgb,var(--line) 80%, transparent)}
+    .panel.small{width:min(470px,100%)} .panel h2{margin:0 0 16px;font-size:28px}
+    .form-grid{display:grid;gap:20px}.two-col{display:grid;grid-template-columns:1fr;gap:16px}
     .photo-box{display:flex;flex-direction:column;align-items:flex-start;gap:14px;background:var(--card2);padding:16px;border-radius:22px}
     .photo-actions{display:flex;flex-wrap:wrap;gap:10px}
-    .field-group{display:grid;gap:10px}
-    .choice-grid{display:grid;grid-template-columns:1fr;gap:12px}
-    .choice{
-      min-height:96px;padding:16px;border-radius:22px;text-align:left;border:1px solid var(--line);background:var(--card)
-    }
+    .field-group{display:grid;gap:10px}.choice-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .choice{min-height:96px;padding:16px;border-radius:22px;text-align:left;border:1px solid var(--line);background:var(--card)}
     .choice.active{border-color:var(--amber);background:var(--amberSoft);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
     .choice-title{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}
     .choice-desc{font-size:14px;color:var(--muted);line-height:1.5}
-    .toggle{
-      width:100%;display:flex;align-items:center;gap:10px;text-align:left;border-radius:22px;padding:16px;border:1px solid var(--line);background:var(--card)
-    }
+    .toggle{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border-radius:22px;padding:16px;border:1px solid var(--line);background:var(--card)}
     .toggle.active{background:#18181b;color:#fff;border-color:#18181b}
-    body.theme-dark .toggle.active{background:#27272a}
-    .toggle .desc{font-size:14px;color:var(--muted)}
-    .toggle.active .desc{color:#d4d4d8}
+    .toggle .desc{font-size:14px;color:var(--muted)} .toggle.active .desc{color:#d4d4d8}
     .modal-actions{display:flex;flex-direction:column-reverse;gap:12px;margin-top:20px}
     .settings-box{border:1px solid var(--line);background:var(--card2);border-radius:22px;padding:16px}
-    .settings-title{font-weight:700;margin-bottom:8px}
-    .small-muted{font-size:14px;color:var(--muted)}
-    .hidden{display:none!important}
+    .settings-title{font-weight:700;margin-bottom:8px}.small-muted{font-size:14px;color:var(--muted)} .hidden{display:none!important}
     @media (min-width:640px){
       .page{padding:16px}.hero{padding:24px}.hero-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.top-actions{grid-template-columns:1fr auto}
       .card-head-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.contacts{grid-template-columns:1fr 1fr}
@@ -351,12 +271,12 @@
   <script>
     const SUPABASE_URL = 'https://rgvjhcmeclnautmwiseo.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const SETTINGS_KEY = 'hairbase_team_settings_v1';
+    const supa = window.supabase;
+    const supabase = supa.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SETTINGS_KEY = 'hairbase_team_settings_v2';
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const DEFAULT_SETTINGS = { defaultEmployee: '', theme: 'system', cardSize: 'normal', showRegularsFirst: true };
 
-    let session = null;
     let user = null;
     let customers = [];
     let searchTerm = '';
@@ -577,41 +497,61 @@
     }
     function openOverlay(el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
     function closeOverlay(el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+
     async function loadCustomers() {
       if (!user) return;
       const { data, error } = await supabase.from('customers').select('*').order('updated_at', { ascending: false });
-      if (!error && data) {
-        customers = data.map(rowToCustomer);
-        renderCustomers();
-      }
+      if (!error && data) { customers = data.map(rowToCustomer); renderCustomers(); }
     }
-    async function login() {
+
+    async function login(ev) {
+      if (ev) ev.preventDefault();
       const email = els.loginEmail.value.trim();
       const password = els.loginPassword.value;
+      if (!email || !password) {
+        els.loginMessage.textContent = 'Bitte E-Mail und Passwort eingeben.';
+        return;
+      }
+      els.loginBtn.disabled = true;
       els.loginMessage.textContent = 'Anmeldung läuft...';
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) { els.loginMessage.textContent = error.message; return; }
-      session = data.session; user = data.user; els.loginMessage.textContent = ''; await afterLogin();
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          els.loginMessage.textContent = error.message;
+          return;
+        }
+        user = data.user;
+        els.loginMessage.textContent = '';
+        await afterLogin();
+      } catch (err) {
+        els.loginMessage.textContent = 'Login fehlgeschlagen.';
+      } finally {
+        els.loginBtn.disabled = false;
+      }
     }
+
     async function afterLogin() {
       els.loginView.classList.add('hidden');
       els.appView.classList.remove('hidden');
       els.userInfo.textContent = `Cloud-Sync aktiv – ${user.email}`;
       await loadCustomers();
     }
+
     async function logout() {
       await supabase.auth.signOut();
-      session = null; user = null; customers = [];
+      user = null; customers = [];
       els.appView.classList.add('hidden');
       els.loginView.classList.remove('hidden');
       renderCustomers();
     }
+
     function newCustomer() {
       editingId = null;
       formState = createEmptyCustomer(settings.defaultEmployee);
       syncFormToInputs();
       openOverlay(els.formOverlay);
     }
+
     function editCustomer(id) {
       const customer = customers.find(c => c.id === id);
       if (!customer) return;
@@ -620,6 +560,7 @@
       syncFormToInputs();
       openOverlay(els.formOverlay);
     }
+
     async function saveCustomer() {
       syncInputsToForm();
       const normalized = {
@@ -632,6 +573,7 @@
         updatedAt: new Date().toISOString()
       };
       if (!normalized.firstName || !normalized.lastName) return;
+
       if (editingId) {
         const { data, error } = await supabase.from('customers').update(customerToRow(normalized)).eq('id', editingId).select().single();
         if (!error && data) {
@@ -651,11 +593,12 @@
       closeOverlay(els.formOverlay);
       editingId = null;
       formState = createEmptyCustomer(settings.defaultEmployee);
-      els.searchInput.focus();
-      setTimeout(() => { highlightId = null; renderCustomers(); }, 1800);
       showToast('Gespeichert');
+      setTimeout(() => { highlightId = null; renderCustomers(); }, 1800);
     }
+
     function askDelete(id) { deleteId = id; openOverlay(els.deleteOverlay); }
+
     async function confirmDelete() {
       if (!deleteId) return;
       const { error } = await supabase.from('customers').delete().eq('id', deleteId);
@@ -667,6 +610,7 @@
         showToast('Gelöscht');
       }
     }
+
     function exportBackup() {
       const payload = { app:'HairBase Team', exportedAt:new Date().toISOString(), customers, settings };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
@@ -678,6 +622,7 @@
       URL.revokeObjectURL(url);
       showToast('Backup exportiert');
     }
+
     async function importBackup(file) {
       if (!file) return;
       try {
@@ -690,48 +635,49 @@
         if (!error) { await loadCustomers(); showToast('Import fertig'); }
       } catch {}
     }
+
     function handleImage(file) {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => { formState.photo = String(reader.result || ''); updateFormUI(); };
       reader.readAsDataURL(file);
     }
+
     function escapeHtml(str) {
       return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
     }
     function escapeAttr(str) { return escapeHtml(str).replaceAll("'", '&#39;'); }
-    function bindTap(el, handler) {
-      if (!el) return;
-      el.addEventListener('click', (ev) => { ev.preventDefault(); handler(ev); }, { passive:false });
-    }
 
-    bindTap(els.loginBtn, login);
+    document.getElementById('loginBtn').addEventListener('click', login);
+    els.loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(e); });
+    els.loginEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(e); });
+
     els.searchInput.addEventListener('input', e => { searchTerm = e.target.value || ''; renderCustomers(); });
-    bindTap(els.newBtn, newCustomer);
-    bindTap(els.syncBtn, loadCustomers);
-    bindTap(els.exportBtn, exportBackup);
-    bindTap(els.importBtn, () => els.fileInput.click());
+    els.newBtn.addEventListener('click', newCustomer);
+    els.syncBtn.addEventListener('click', loadCustomers);
+    els.exportBtn.addEventListener('click', exportBackup);
+    els.importBtn.addEventListener('click', () => els.fileInput.click());
     els.fileInput.addEventListener('change', e => importBackup(e.target.files && e.target.files[0]));
-    bindTap(els.settingsBtn, () => { updateSettingsUI(); openOverlay(els.settingsOverlay); });
-    bindTap(els.logoutBtn, logout);
-    bindTap(els.settingsClose, () => { saveSettings(); applyTheme(); renderCustomers(); closeOverlay(els.settingsOverlay); });
+    els.settingsBtn.addEventListener('click', () => { updateSettingsUI(); openOverlay(els.settingsOverlay); });
+    els.logoutBtn.addEventListener('click', logout);
+    els.settingsClose.addEventListener('click', () => { saveSettings(); applyTheme(); renderCustomers(); closeOverlay(els.settingsOverlay); });
     els.defaultEmployee.addEventListener('input', e => { settings.defaultEmployee = toTitleCase(e.target.value); });
-    document.querySelectorAll('.theme-btn').forEach(btn => bindTap(btn, () => { settings.theme = btn.dataset.theme; updateSettingsUI(); applyTheme(); }));
-    document.querySelectorAll('.size-btn').forEach(btn => bindTap(btn, () => { settings.cardSize = btn.dataset.size; updateSettingsUI(); renderCustomers(); }));
-    bindTap(els.cancelBtn, () => closeOverlay(els.formOverlay));
-    bindTap(els.saveBtn, saveCustomer);
+    document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => { settings.theme = btn.dataset.theme; updateSettingsUI(); applyTheme(); }));
+    document.querySelectorAll('.size-btn').forEach(btn => btn.addEventListener('click', () => { settings.cardSize = btn.dataset.size; updateSettingsUI(); renderCustomers(); }));
+    els.cancelBtn.addEventListener('click', () => closeOverlay(els.formOverlay));
+    els.saveBtn.addEventListener('click', saveCustomer);
     els.mobile.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); formState.mobile = e.target.value; });
     els.phone.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); formState.phone = e.target.value; });
     els.lastMix.addEventListener('input', e => { formState.lastMix = e.target.value; updateFormUI(); });
-    bindTap(els.copyMixBtn, () => copyText(els.lastMix.value));
-    bindTap(els.prefMobile, () => { formState.preferredContact = 'mobile'; updateFormUI(); });
-    bindTap(els.prefPhone, () => { formState.preferredContact = 'phone'; updateFormUI(); });
-    bindTap(els.regularBtn, () => { formState.isRegular = !formState.isRegular; updateFormUI(); });
+    els.copyMixBtn.addEventListener('click', () => copyText(els.lastMix.value));
+    els.prefMobile.addEventListener('click', () => { formState.preferredContact = 'mobile'; updateFormUI(); });
+    els.prefPhone.addEventListener('click', () => { formState.preferredContact = 'phone'; updateFormUI(); });
+    els.regularBtn.addEventListener('click', () => { formState.isRegular = !formState.isRegular; updateFormUI(); });
     els.cameraInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
     els.galleryInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
-    bindTap(els.removePhotoBtn, () => { formState.photo = ''; updateFormUI(); });
-    bindTap(els.deleteCancelBtn, () => closeOverlay(els.deleteOverlay));
-    bindTap(els.deleteConfirmBtn, confirmDelete);
+    els.removePhotoBtn.addEventListener('click', () => { formState.photo = ''; updateFormUI(); });
+    els.deleteCancelBtn.addEventListener('click', () => closeOverlay(els.deleteOverlay));
+    els.deleteConfirmBtn.addEventListener('click', confirmDelete);
 
     [els.settingsOverlay, els.formOverlay, els.deleteOverlay].forEach(overlay => {
       overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(overlay); });
@@ -755,10 +701,13 @@
     async function init() {
       applyTheme();
       updateSettingsUI();
-      const { data } = await supabase.auth.getSession();
-      session = data.session;
-      user = data.session && data.session.user;
-      if (user) await afterLogin();
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data && data.session && data.session.user) {
+          user = data.session.user;
+          await afterLogin();
+        }
+      } catch {}
     }
     init();
   </script>
