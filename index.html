@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HairBase</title>
 
-  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       background: #f4f6f8;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
     }
 
     .card {
@@ -27,12 +27,19 @@
       width: 320px;
     }
 
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
     input, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
       border-radius: 10px;
       border: 1px solid #ddd;
+      box-sizing: border-box;
+      font: inherit;
     }
 
     button {
@@ -47,98 +54,164 @@
       background: #ff9900;
     }
 
-    #app { display: none; }
+    #app {
+      display: none;
+    }
 
     .customer {
-      padding: 8px;
+      padding: 8px 0;
       border-bottom: 1px solid #eee;
+    }
+
+    .msg {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #444;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div class="card" id="login">
-  <h2>Salon Login</h2>
-  <input id="email" type="email" placeholder="E-Mail" />
-  <input id="password" type="password" placeholder="Passwort" />
-  <button onclick="login()">Anmelden</button>
-  <div id="msg"></div>
-</div>
+  <!-- LOGIN -->
+  <div class="card" id="login">
+    <h2>Salon Login</h2>
+    <input id="email" type="email" placeholder="E-Mail" />
+    <input id="password" type="password" placeholder="Passwort" />
+    <button id="loginBtn" type="button">Anmelden</button>
+    <div id="msg" class="msg"></div>
+  </div>
 
-<!-- APP -->
-<div class="card" id="app">
-  <h2>Kunden</h2>
-  <div id="customers"></div>
+  <!-- APP -->
+  <div class="card" id="app">
+    <h2>Kunden</h2>
+    <div id="customers"></div>
 
-  <input id="newName" placeholder="Neuer Kunde (Name)" />
-  <button onclick="addCustomer()">Speichern</button>
-</div>
+    <input id="newName" placeholder="Neuer Kunde (Vorname)" />
+    <button id="saveBtn" type="button">Speichern</button>
+    <div id="appMsg" class="msg"></div>
+  </div>
 
-<script>
-  const supabaseClient = supabase.createClient(
-    "https://rgvjhcmeclnautmwiseo.supabase.co",
-    "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux"
-  );
+  <script>
+    const supabaseClient = supabase.createClient(
+      "https://rgvjhcmeclnautmwiseo.supabase.co",
+      "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux"
+    );
 
-  async function login() {
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const loginBox = document.getElementById("login");
+    const appBox = document.getElementById("app");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
     const msg = document.getElementById("msg");
+    const customersBox = document.getElementById("customers");
+    const newNameInput = document.getElementById("newName");
+    const saveBtn = document.getElementById("saveBtn");
+    const appMsg = document.getElementById("appMsg");
 
-    msg.innerText = "Lade...";
+    async function login() {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+      if (!email || !password) {
+        msg.innerText = "Bitte E-Mail und Passwort eingeben.";
+        return;
+      }
 
-    if (error) {
-      msg.innerText = "Fehler: " + error.message;
-    } else {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      loadCustomers();
+      msg.innerText = "Lade...";
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        msg.innerText = "Fehler: " + error.message;
+        return;
+      }
+
+      msg.innerText = "";
+      loginBox.style.display = "none";
+      appBox.style.display = "block";
+      await loadCustomers();
     }
-  }
 
-  async function loadCustomers() {
-    const { data, error } = await supabaseClient
-      .from("customers")
-      .select("*")
-      .order("created_at", { ascending: false });
+    async function loadCustomers() {
+      customersBox.innerHTML = "";
+      appMsg.innerText = "";
 
-    const container = document.getElementById("customers");
-    container.innerHTML = "";
+      const { data, error } = await supabaseClient
+        .from("customers")
+        .select("*");
 
-    if (data) {
+      if (error) {
+        appMsg.innerText = "Fehler beim Laden: " + error.message;
+        console.log(error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        customersBox.innerHTML = '<div class="customer">Noch keine Kunden vorhanden.</div>';
+        return;
+      }
+
       data.forEach(c => {
         const div = document.createElement("div");
         div.className = "customer";
         div.innerText = c.first_name || "Kunde";
-        container.appendChild(div);
+        customersBox.appendChild(div);
       });
     }
-  }
 
-  async function addCustomer() {
-    const input = document.getElementById("newName");
-    const name = input.value.trim();
+    async function addCustomer() {
+      const name = newNameInput.value.trim();
 
-    if (!name) return;
+      if (!name) {
+        appMsg.innerText = "Bitte einen Namen eingeben.";
+        return;
+      }
 
-    const { error } = await supabaseClient
-      .from("customers")
-      .insert([{ first_name: name }])
-    if (!error) {
-      input.value = "";
-      loadCustomers();
-    } else {
-      console.log(error);
+      appMsg.innerText = "Speichere...";
+
+      const { error } = await supabaseClient
+        .from("customers")
+        .insert([{ first_name: name }]);
+
+      if (error) {
+        appMsg.innerText = "Fehler beim Speichern: " + error.message;
+        console.log(error);
+        return;
+      }
+
+      newNameInput.value = "";
+      appMsg.innerText = "Gespeichert.";
+      await loadCustomers();
     }
-  }
-</script>
+
+    async function checkSession() {
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data && data.session) {
+        loginBox.style.display = "none";
+        appBox.style.display = "block";
+        await loadCustomers();
+      }
+    }
+
+    loginBtn.addEventListener("click", login);
+    saveBtn.addEventListener("click", addCustomer);
+
+    passwordInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") login();
+    });
+
+    newNameInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") addCustomer();
+    });
+
+    checkSession();
+  </script>
 
 </body>
 </html>
