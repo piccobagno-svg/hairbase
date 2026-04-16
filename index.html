@@ -2,242 +2,1125 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>HairBase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#18181b" />
+  <title>HairBase Pro</title>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
+    :root{
+      --bg:#ffffff; --text:#111827; --muted:#6b7280; --card:#ffffff; --card2:#fafafa; --line:#e5e7eb;
+      --amber:#f59e0b; --amber2:#fcd34d; --amberSoft:#fffbeb; --danger:#dc2626; --success:#10b981;
+      --hero1:#18181b; --hero2:#27272a; --hero3:#3f3f46; --shadow:0 20px 40px rgba(0,0,0,.08);
     }
+    body.theme-dark{
+      --bg:#09090b; --text:#f4f4f5; --muted:#d4d4d8; --card:#18181b; --card2:#111111; --line:#27272a;
+      --amber:#fbbf24; --amber2:#f59e0b; --amberSoft:rgba(245,158,11,.08); --hero1:#09090b; --hero2:#111827; --hero3:#000000;
+      --shadow:0 20px 40px rgba(0,0,0,.28);
+    }
+    body.theme-contrast{
+      --bg:#000000; --text:#ffffff; --muted:#e5e7eb; --card:#111111; --card2:#0a0a0a; --line:#ffffff;
+      --amber:#ffd000; --amber2:#ffb000; --amberSoft:#1a1200; --hero1:#000000; --hero2:#000000; --hero3:#000000; --shadow:none;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+      transition:background-color .35s ease,color .35s ease;
+    }
+    .hidden{display:none!important}
+    .page{
+      min-height:100vh; padding:12px;
+      background:linear-gradient(135deg, color-mix(in srgb,var(--bg) 96%, #f4f4f5), color-mix(in srgb,var(--bg) 92%, #fffbeb), color-mix(in srgb,var(--bg) 96%, #f4f4f5));
+      transition:background .35s ease;
+    }
+    .app{max-width:1120px;margin:0 auto}
+    .hero{
+      margin-bottom:18px; border-radius:30px; padding:20px; color:#fff;
+      background:linear-gradient(135deg,var(--hero1),var(--hero2),var(--hero3)); box-shadow:var(--shadow);
+    }
+    .hero-top{display:flex;flex-direction:column;gap:16px}
+    .hero h1{margin:0;font-size:30px;line-height:1.1}
+    .hero p{margin:6px 0 0;color:#d4d4d8;font-size:14px}
+    .hero-sub{display:flex;align-items:center;gap:8px;color:#d4d4d8;font-size:14px;margin-bottom:8px}
+    .hero-right{display:flex;flex-wrap:wrap;gap:8px}
+    .hero-badge,.ghost{
+      min-height:46px; padding:10px 14px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:rgba(255,255,255,.10); color:#fff; border:1px solid rgba(255,255,255,.14)
+    }
+    .top-actions{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:18px}
+    .search-wrap{position:relative}
+    .search-wrap input{padding-left:46px}
+    .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#9ca3af}
+    .letters{display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+    .letter{padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#e5e7eb;color:#9ca3af}
+    .letter.active{background:#18181b;color:#fff}
+    body.theme-dark .letter{background:#18181b;color:#71717a}
+    body.theme-dark .letter.active{background:#f4f4f5;color:#09090b}
+    body.theme-contrast .letter{background:#222;color:#999;border:1px solid #fff}
+    body.theme-contrast .letter.active{background:#fff;color:#000}
 
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      width: 320px;
+    input,textarea,button,select{font:inherit}
+    input,textarea,select{
+      width:100%; background:var(--card); color:var(--text); border:1px solid var(--line);
+      border-radius:18px; outline:none; padding:14px 16px; transition:all .25s ease;
+      box-shadow:0 4px 14px rgba(0,0,0,.04);
     }
+    textarea{min-height:170px;resize:vertical;line-height:1.6}
+    input:focus,textarea:focus,select:focus{border-color:var(--amber); box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+    button,.btn-label{
+      min-height:46px; padding:10px 14px; border-radius:18px; border:1px solid var(--line); cursor:pointer;
+      background:var(--card); color:var(--text); display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      transition:transform .15s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
+      touch-action:manipulation;
+    }
+    button:active,.btn-label:active{transform:scale(.985)}
+    button.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--amber),var(--amber2));box-shadow:0 10px 24px rgba(245,158,11,.28);font-weight:700}
+    button.outline-amber{border-color:#fcd34d}
+    button.outline-amber:hover{background:var(--amberSoft)}
+    button.danger{border-color:#fecaca;color:#dc2626}
+    .list{display:grid;gap:18px}
+    .card{
+      border-radius:30px; border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));
+      background:var(--card); box-shadow:var(--shadow); overflow:hidden; transition:all .25s ease;
+    }
+    .card.highlight{border-color:var(--amber); box-shadow:0 0 0 3px rgba(245,158,11,.2), var(--shadow)}
+    .card-head{padding:22px 22px 12px}
+    .card-head-top{display:flex;flex-direction:column;gap:14px}
+    .main{display:flex;gap:14px;align-items:flex-start;min-width:0}
+    .avatar{
+      width:64px;height:64px;flex:0 0 auto;border-radius:18px;object-fit:cover;
+      border:1px solid color-mix(in srgb,var(--amber) 35%, var(--line));
+      background:linear-gradient(135deg,#fef3c7,#fff7ed);display:flex;align-items:center;justify-content:center;
+      color:#b45309;font-weight:800;
+    }
+    .avatar.large{width:80px;height:80px}.avatar.compact{width:56px;height:56px}
+    .meta{min-width:0}
+    .eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:8px}
+    .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text)}
+    .title.normal{font-size:24px}.title.large{font-size:30px}.title.compact{font-size:20px}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;
+      background:#fef3c7;color:#92400e
+    }
+    body.theme-dark .pill{background:rgba(245,158,11,.14);color:#fde68a}
+    body.theme-contrast .pill{background:#222;color:#fff;border:1px solid #fff}
+    .pill.dark{background:#18181b;color:#fff}
+    body.theme-dark .pill.dark{background:#3f3f46}
+    .card-body{padding:0 22px 22px;display:grid}
+    .card-body.compact{gap:12px}.card-body.normal{gap:16px}.card-body.large{gap:20px}
+    .contacts{display:grid;gap:12px}
+    .contact{
+      min-height:48px;border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px;
+      background:var(--card2);color:#52525b
+    }
+    body.theme-dark .contact{color:#d4d4d8}
+    .contact.active{background:var(--amberSoft);color:#b45309;box-shadow:inset 0 0 0 1px rgba(245,158,11,.25);font-weight:700}
+    body.theme-dark .contact.active{color:#fde68a}
+    .contact-right{margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9ca3af}
+    .mix{
+      border-radius:22px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 25%, var(--line));
+      background:linear-gradient(135deg,#fffbeb,#fff7ed)
+    }
+    body.theme-dark .mix{background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(9,9,11,.96))}
+    body.theme-contrast .mix{background:#111;border-color:#fff}
+    .mix-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+    .mix-title{display:flex;align-items:center;gap:8px;font-weight:700}
+    .mix-text{white-space:pre-wrap;font-size:14px;line-height:1.65;color:#3f3f46}
+    body.theme-dark .mix-text{color:#d4d4d8}
+    .item-actions{display:flex;flex-direction:column;gap:10px;padding:0 6px 6px}
+    .empty{border-radius:28px;padding:34px;text-align:center;background:var(--card);border:1px dashed var(--line);color:var(--muted)}
+    .toast{
+      position:fixed;top:14px;right:14px;z-index:100;display:none;align-items:center;gap:8px;background:var(--success);color:#fff;
+      padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);font-weight:700
+    }
+    .toast.show{display:flex}
 
-    h2 {
-      margin-top: 0;
-      margin-bottom: 16px;
+    .overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.42); display:none; align-items:flex-end; justify-content:center; padding:12px; z-index:90
     }
-
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      font: inherit;
+    .overlay.open{display:flex}
+    .panel{
+      width:min(980px,100%); max-height:92vh; overflow:auto; background:var(--card); color:var(--text);
+      border-radius:30px; padding:20px; box-shadow:0 24px 60px rgba(0,0,0,.22); border:1px solid color-mix(in srgb,var(--line) 80%, transparent);
     }
-
-    button {
-      background: orange;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
+    .panel.small{width:min(470px,100%)}
+    .panel h2{margin:0 0 16px;font-size:28px}
+    .form-grid{display:grid;gap:20px}
+    .two-col{display:grid;grid-template-columns:1fr;gap:16px}
+    .photo-box{display:flex;flex-direction:column;align-items:flex-start;gap:14px;background:var(--card2);padding:16px;border-radius:22px}
+    .photo-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .field-group{display:grid;gap:10px}
+    .choice-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .choice{
+      min-height:96px;padding:16px;border-radius:22px;text-align:left;border:1px solid var(--line);background:var(--card)
     }
-
-    button:hover {
-      background: #ff9900;
+    .choice.active{border-color:var(--amber);background:var(--amberSoft);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+    .choice-title{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:6px}
+    .choice-desc{font-size:14px;color:var(--muted);line-height:1.5}
+    .toggle{
+      width:100%;display:flex;align-items:center;gap:10px;text-align:left;border-radius:22px;padding:16px;border:1px solid var(--line);background:var(--card)
     }
-
-    #app {
-      display: none;
+    .toggle.active{background:#18181b;color:#fff;border-color:#18181b}
+    body.theme-dark .toggle.active{background:#27272a}
+    .toggle .desc{font-size:14px;color:var(--muted)}
+    .toggle.active .desc{color:#d4d4d8}
+    .modal-actions{display:flex;flex-direction:column-reverse;gap:12px;margin-top:20px}
+    .settings-box{border:1px solid var(--line);background:var(--card2);border-radius:22px;padding:16px}
+    .settings-title{font-weight:700;margin-bottom:8px}
+    .switch{border:none;border-radius:999px;padding:10px 14px;min-height:auto;font-size:14px;font-weight:700}
+    .switch.on{background:#d1fae5;color:#047857}.switch.off{background:#e5e7eb;color:#52525b}
+    .small-muted{font-size:14px;color:var(--muted)}
+    .login-shell{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px;
+      background:linear-gradient(135deg,#fff7ed,#ffffff,#f4f4f5);
     }
-
-    .customer {
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
+    .login-card{
+      width:min(460px,100%);padding:24px;border-radius:30px;background:var(--card);box-shadow:var(--shadow);border:1px solid var(--line)
     }
-
-    .msg {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #444;
-      white-space: pre-wrap;
+    .login-card h1{margin:0;font-size:34px}
+    .login-msg{margin-top:12px;font-size:14px;color:var(--muted)}
+    @media (min-width:640px){
+      .page{padding:16px}.hero{padding:24px}.hero-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.top-actions{grid-template-columns:1fr auto}
+      .card-head-top{flex-direction:row;justify-content:space-between;align-items:flex-start}.contacts{grid-template-columns:1fr 1fr}
+      .item-actions{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}.two-col{grid-template-columns:1fr 1fr}.choice-grid{grid-template-columns:1fr 1fr}.modal-actions{flex-direction:row;justify-content:flex-end}
     }
+    @media (min-width:768px){.letters{display:flex}}
   </style>
 </head>
+<body class="theme-system">
+  <div id="toast" class="toast">✅ Gespeichert</div>
 
-<body>
-
-  <!-- LOGIN -->
-  <div class="card" id="login">
-    <h2>Salon Login</h2>
-    <input id="email" type="email" placeholder="E-Mail" />
-    <input id="password" type="password" placeholder="Passwort" />
-    <button id="loginBtn" type="button">Anmelden</button>
-    <div id="msg" class="msg"></div>
+  <div id="loginView" class="login-shell">
+    <div class="login-card">
+      <div class="hero-sub" style="color:var(--muted)">☁️ HairBase Pro</div>
+      <h1>Salon Login</h1>
+      <p class="small-muted">Mit eurem Team-Login meldest du dich an und synchronisierst deine Kunden mit Supabase.</p>
+      <div class="form-grid" style="margin-top:20px">
+        <div class="field-group">
+          <label class="small-muted">E-Mail</label>
+          <input id="loginEmail" type="email" placeholder="z. B. salon@hairbase.de" />
+        </div>
+        <div class="field-group">
+          <label class="small-muted">Passwort</label>
+          <input id="loginPassword" type="password" placeholder="Passwort" />
+        </div>
+        <div id="loginMsg" class="login-msg"></div>
+        <div class="modal-actions" style="margin-top:0">
+          <button id="loginBtn" class="primary" type="button">Anmelden</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- APP -->
-  <div class="card" id="app">
-    <h2>Kunden</h2>
-    <div id="customers"></div>
+  <div id="appView" class="hidden">
+    <div class="page">
+      <div class="app">
+        <section class="hero">
+          <div class="hero-top">
+            <div>
+              <div class="hero-sub">👥 HairBase Pro</div>
+              <h1>Kundenkartei</h1>
+              <p id="userInfo">Mit Supabase synchronisiert</p>
+            </div>
+            <div class="hero-right">
+              <input id="fileInput" type="file" accept="application/json" class="hidden" />
+              <button id="reloadBtn" class="ghost">🔄 Aktualisieren</button>
+              <button id="exportBtn" class="ghost">⬇️ Backup</button>
+              <button id="importBtn" class="ghost">⬆️ Wiederherstellen</button>
+              <button id="historyBtn" class="ghost">↺ Verlauf</button>
+              <button id="settingsBtn" class="ghost">⚙️ Einstellungen</button>
+              <button id="logoutBtn" class="ghost">↩️ Logout</button>
+              <div id="countBadge" class="hero-badge">0 Kunden</div>
+            </div>
+          </div>
+        </section>
 
-    <input id="newName" placeholder="Neuer Kunde (Vorname)" />
-    <button id="saveBtn" type="button">Speichern</button>
-    <div id="appMsg" class="msg"></div>
+        <section class="top-actions">
+          <div class="search-wrap">
+            <span class="search-icon">🔎</span>
+            <input id="searchInput" type="text" placeholder="Suchen nach Name, Nummer, Mitarbeiter, Mischung oder Stammkunde" />
+          </div>
+          <button id="newBtn" class="primary" type="button">＋ Neuer Kunde</button>
+        </section>
+
+        <section id="letters" class="letters"></section>
+        <section id="customers" class="list"></section>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay">
+    <div class="panel small">
+      <h2>⚙️ Einstellungen</h2>
+      <div class="form-grid">
+        <div class="settings-box">
+          <div class="settings-title">Standard Mitarbeiter</div>
+          <input id="defaultEmployee" placeholder="z.B. Anna" />
+        </div>
+        <div class="settings-box">
+          <div class="settings-title">Farbstil</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button type="button" class="theme-btn" data-theme="system">System</button>
+            <button type="button" class="theme-btn" data-theme="dark">Dunkel</button>
+            <button type="button" class="theme-btn" data-theme="contrast">Hoher Kontrast</button>
+          </div>
+        </div>
+        <div class="settings-box">
+          <div class="settings-title">Kartenansicht</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button type="button" class="size-btn" data-size="compact">Kompakt</button>
+            <button type="button" class="size-btn" data-size="normal">Normal</button>
+            <button type="button" class="size-btn" data-size="large">Groß</button>
+          </div>
+        </div>
+        <div class="settings-box">
+          <div class="settings-title">Automatisches Backup</div>
+          <div style="display:flex;justify-content:space-between;gap:16px;align-items:center">
+            <p class="small-muted">Speichert automatisch mehrere Versionen deiner Kundenkartei.</p>
+            <button id="autoBackupToggle" type="button" class="switch on">Aktiv</button>
+          </div>
+        </div>
+        <div class="settings-box">
+          <div class="settings-title">Anzahl automatischer Backups</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button type="button" class="limit-btn" data-limit="5">5</button>
+            <button type="button" class="limit-btn" data-limit="10">10</button>
+            <button type="button" class="limit-btn" data-limit="20">20</button>
+          </div>
+        </div>
+        <div class="settings-box">
+          <div class="settings-title">Stammkunden zuerst</div>
+          <div style="display:flex;justify-content:space-between;gap:16px;align-items:center">
+            <p class="small-muted">Sortiert Stammkunden automatisch nach oben.</p>
+            <button id="regularsToggle" type="button" class="switch on">Aktiv</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions"><button id="settingsClose" type="button">Fertig</button></div>
+    </div>
+  </div>
+
+  <div id="historyOverlay" class="overlay">
+    <div class="panel small">
+      <h2>↺ Backup Verlauf</h2>
+      <div id="historyList" class="form-grid"></div>
+      <div class="modal-actions"><button id="historyClose" type="button">Schließen</button></div>
+    </div>
+  </div>
+
+  <div id="formOverlay" class="overlay">
+    <div class="panel">
+      <h2 id="formTitle">Neuen Kunden anlegen</h2>
+      <div class="form-grid">
+        <div class="photo-box">
+          <div id="avatarPreview"></div>
+          <div class="photo-actions">
+            <label class="btn-label">📷 Kamera<input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" /></label>
+            <label class="btn-label">🖼️ Mediathek<input id="galleryInput" type="file" accept="image/*" class="hidden" /></label>
+            <button id="removePhotoBtn" type="button">Foto entfernen</button>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field-group"><label class="small-muted">Vorname</label><input id="firstName" /></div>
+          <div class="field-group"><label class="small-muted">Nachname</label><input id="lastName" /></div>
+        </div>
+
+        <div class="two-col">
+          <div class="field-group"><label class="small-muted">Mobil</label><input id="mobile" type="tel" inputmode="tel" /></div>
+          <div class="field-group"><label class="small-muted">Festnetz</label><input id="phone" type="tel" inputmode="tel" /></div>
+        </div>
+
+        <div class="field-group"><label class="small-muted">Mitarbeiter</label><input id="employee" placeholder="Zum Beispiel: Anna" /></div>
+
+        <div class="field-group">
+          <label class="small-muted">Bevorzugte Nummer</label>
+          <div class="choice-grid">
+            <button id="prefMobile" type="button" class="choice">
+              <div class="choice-title">📱 Mobil <span id="starMobile" class="hidden">⭐</span></div>
+              <div class="choice-desc">Diese Nummer wird in der Schnellansicht bevorzugt angezeigt.</div>
+            </button>
+            <button id="prefPhone" type="button" class="choice">
+              <div class="choice-title">☎️ Festnetz <span id="starPhone" class="hidden">⭐</span></div>
+              <div class="choice-desc">Ideal, wenn der Kunde lieber über Festnetz erreichbar ist.</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="small-muted">Letzte Mischung</label>
+          <textarea id="lastMix" placeholder="Zum Beispiel: Ansatz 6/0 + 6/7, 6% Oxidant. Längen Gloss 9/16 + Clear."></textarea>
+          <div><button id="copyMixBtn" type="button" class="outline-amber">📋 Mischung kopieren</button></div>
+        </div>
+
+        <div class="field-group">
+          <label class="small-muted">Zusatz</label>
+          <button id="regularBtn" type="button" class="toggle">
+            <span>⭐</span>
+            <div>
+              <div style="font-weight:700">Stammkunde</div>
+              <div class="desc">Optional markieren, falls dieser Kunde besonders häufig kommt.</div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelBtn" type="button">Abbrechen</button>
+        <button id="saveBtn" type="button" class="primary">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteOverlay" class="overlay">
+    <div class="panel small">
+      <h2>Kunde wirklich löschen?</h2>
+      <p class="small-muted" style="margin-top:0">Dieser Eintrag wird aus der Kundenkartei entfernt. Das kann nicht rückgängig gemacht werden.</p>
+      <div class="modal-actions">
+        <button id="deleteCancelBtn" type="button">Abbrechen</button>
+        <button id="deleteConfirmBtn" type="button" class="danger">Löschen</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const supabaseClient = supabase.createClient(
-      "https://rgvjhcmeclnautmwiseo.supabase.co",
-      "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux"
-    );
+    const SUPABASE_URL = "https://rgvjhcmeclnautmwiseo.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const loginBox = document.getElementById("login");
-    const appBox = document.getElementById("app");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const loginBtn = document.getElementById("loginBtn");
-    const msg = document.getElementById("msg");
-    const customersBox = document.getElementById("customers");
-    const newNameInput = document.getElementById("newName");
-    const saveBtn = document.getElementById("saveBtn");
-    const appMsg = document.getElementById("appMsg");
+    const SETTINGS_KEY = 'hairbase_settings_v17_supabase';
+    const AUTO_BACKUP_KEY = 'hairbase_auto_backups_v17_supabase';
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const DEFAULT_SETTINGS = {
+      autoBackupEnabled: true,
+      backupLimit: 10,
+      showRegularsFirst: true,
+      defaultEmployee: '',
+      theme: 'system',
+      cardSize: 'normal'
+    };
 
-    async function login() {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+    let currentUser = null;
+    let customers = [];
+    let settings = { ...DEFAULT_SETTINGS };
+    let backups = [];
+    let searchTerm = '';
+    let editingId = null;
+    let deleteId = null;
+    let highlightId = null;
+    let formState = createEmptyCustomer();
 
-      if (!email || !password) {
-        msg.innerText = "Bitte E-Mail und Passwort eingeben.";
-        return;
+    const els = {
+      body: document.body,
+      toast: document.getElementById('toast'),
+      loginView: document.getElementById('loginView'),
+      appView: document.getElementById('appView'),
+      loginEmail: document.getElementById('loginEmail'),
+      loginPassword: document.getElementById('loginPassword'),
+      loginBtn: document.getElementById('loginBtn'),
+      loginMsg: document.getElementById('loginMsg'),
+      userInfo: document.getElementById('userInfo'),
+      countBadge: document.getElementById('countBadge'),
+      searchInput: document.getElementById('searchInput'),
+      newBtn: document.getElementById('newBtn'),
+      letters: document.getElementById('letters'),
+      customers: document.getElementById('customers'),
+      reloadBtn: document.getElementById('reloadBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      importBtn: document.getElementById('importBtn'),
+      historyBtn: document.getElementById('historyBtn'),
+      settingsBtn: document.getElementById('settingsBtn'),
+      logoutBtn: document.getElementById('logoutBtn'),
+      fileInput: document.getElementById('fileInput'),
+      settingsOverlay: document.getElementById('settingsOverlay'),
+      settingsClose: document.getElementById('settingsClose'),
+      defaultEmployee: document.getElementById('defaultEmployee'),
+      autoBackupToggle: document.getElementById('autoBackupToggle'),
+      regularsToggle: document.getElementById('regularsToggle'),
+      historyOverlay: document.getElementById('historyOverlay'),
+      historyList: document.getElementById('historyList'),
+      historyClose: document.getElementById('historyClose'),
+      formOverlay: document.getElementById('formOverlay'),
+      formTitle: document.getElementById('formTitle'),
+      avatarPreview: document.getElementById('avatarPreview'),
+      cameraInput: document.getElementById('cameraInput'),
+      galleryInput: document.getElementById('galleryInput'),
+      removePhotoBtn: document.getElementById('removePhotoBtn'),
+      firstName: document.getElementById('firstName'),
+      lastName: document.getElementById('lastName'),
+      mobile: document.getElementById('mobile'),
+      phone: document.getElementById('phone'),
+      employee: document.getElementById('employee'),
+      prefMobile: document.getElementById('prefMobile'),
+      prefPhone: document.getElementById('prefPhone'),
+      starMobile: document.getElementById('starMobile'),
+      starPhone: document.getElementById('starPhone'),
+      lastMix: document.getElementById('lastMix'),
+      copyMixBtn: document.getElementById('copyMixBtn'),
+      regularBtn: document.getElementById('regularBtn'),
+      cancelBtn: document.getElementById('cancelBtn'),
+      saveBtn: document.getElementById('saveBtn'),
+      deleteOverlay: document.getElementById('deleteOverlay'),
+      deleteCancelBtn: document.getElementById('deleteCancelBtn'),
+      deleteConfirmBtn: document.getElementById('deleteConfirmBtn')
+    };
+
+    function createEmptyCustomer(defaultEmployee = '') {
+      return {
+        id: '',
+        firstName: '',
+        lastName: '',
+        phone: '',
+        mobile: '',
+        preferredContact: 'mobile',
+        employee: defaultEmployee,
+        lastMix: '',
+        photo: '',
+        isRegular: false,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function normalizeSettings(raw) {
+      return {
+        autoBackupEnabled: raw && raw.autoBackupEnabled !== undefined ? raw.autoBackupEnabled : DEFAULT_SETTINGS.autoBackupEnabled,
+        backupLimit: raw && [5,10,20].includes(raw.backupLimit) ? raw.backupLimit : DEFAULT_SETTINGS.backupLimit,
+        showRegularsFirst: raw && raw.showRegularsFirst !== undefined ? raw.showRegularsFirst : DEFAULT_SETTINGS.showRegularsFirst,
+        defaultEmployee: String((raw && raw.defaultEmployee) || ''),
+        theme: raw && ['system','dark','contrast'].includes(raw.theme) ? raw.theme : DEFAULT_SETTINGS.theme,
+        cardSize: raw && ['compact','normal','large'].includes(raw.cardSize) ? raw.cardSize : DEFAULT_SETTINGS.cardSize
+      };
+    }
+
+    function rowToCustomer(row) {
+      return {
+        id: row.id,
+        firstName: row.first_name || '',
+        lastName: row.last_name || '',
+        phone: row.phone || '',
+        mobile: row.mobile || '',
+        preferredContact: row.preferred_contact || 'mobile',
+        employee: row.employee || '',
+        lastMix: row.last_mix || '',
+        photo: row.photo || '',
+        isRegular: !!row.is_regular,
+        updatedAt: row.updated_at || new Date().toISOString()
+      };
+    }
+
+    function customerToRow(customer) {
+      return {
+        owner_id: currentUser.id,
+        first_name: customer.firstName.trim(),
+        last_name: customer.lastName.trim(),
+        phone: customer.phone.trim() || null,
+        mobile: customer.mobile.trim() || null,
+        preferred_contact: customer.preferredContact === 'phone' ? 'phone' : 'mobile',
+        employee: customer.employee.trim() || null,
+        last_mix: customer.lastMix.trim() || null,
+        photo: customer.photo || null,
+        is_regular: !!customer.isRegular,
+        updated_at: new Date().toISOString()
+      };
+    }
+
+    function loadSettings() {
+      try {
+        const s = localStorage.getItem(SETTINGS_KEY);
+        settings = s ? normalizeSettings(JSON.parse(s)) : { ...DEFAULT_SETTINGS };
+      } catch {
+        settings = { ...DEFAULT_SETTINGS };
       }
+      try {
+        const b = localStorage.getItem(AUTO_BACKUP_KEY);
+        backups = b ? JSON.parse(b) : [];
+      } catch {
+        backups = [];
+      }
+    }
 
-      msg.innerText = "Lade...";
+    function saveSettings() {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    }
 
-      const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
+    function saveBackupSnapshot() {
+      if (!settings.autoBackupEnabled) return;
+      const snapshot = {
+        id: crypto.randomUUID(),
+        date: new Date().toISOString(),
+        data: customers
+      };
+      const last = backups[0];
+      const sameAsLast = last && JSON.stringify(last.data) === JSON.stringify(customers);
+      if (!sameAsLast) {
+        backups = [snapshot, ...backups].slice(0, settings.backupLimit);
+        localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(backups));
+      }
+    }
+
+    function applyTheme() {
+      els.body.classList.remove('theme-system','theme-dark','theme-contrast');
+      let theme = settings.theme;
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        theme = prefersDark ? 'dark' : 'system';
+      }
+      els.body.classList.add(theme === 'system' ? 'theme-system' : `theme-${theme}`);
+      updateSettingsUI();
+    }
+
+    function showToast(text='Gespeichert') {
+      els.toast.textContent = `✅ ${text}`;
+      els.toast.classList.add('show');
+      setTimeout(() => els.toast.classList.remove('show'), 1200);
+    }
+
+    async function copyText(text) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Kopiert');
+      } catch {}
+    }
+
+    function normalizeSearch(value) {
+      return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss');
+    }
+
+    function formatPhoneNumber(value) {
+      const digits = String(value || '').replace(/\D/g,'').slice(0,11);
+      if (digits.length <= 4) return digits;
+      if (digits.length <= 7) return digits.replace(/(\d{4})(\d+)/,'$1 $2');
+      return digits.replace(/(\d{4})(\d{3})(\d+)/,'$1 $2 $3');
+    }
+
+    function toTitleCase(value) {
+      return String(value || '').toLowerCase().split(/(\s|-)/).map(part => {
+        if (part === ' ' || part === '-') return part;
+        return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
+      }).join('');
+    }
+
+    function sortedCustomers() {
+      return customers.slice().sort((a,b) => {
+        if (settings.showRegularsFirst && a.isRegular !== b.isRegular) return a.isRegular ? -1 : 1;
+        return (`${a.lastName} ${a.firstName}`).toLowerCase().localeCompare((`${b.lastName} ${b.firstName}`).toLowerCase(), 'de');
       });
+    }
 
-      if (error) {
-        msg.innerText = "Fehler: " + error.message;
+    function filteredCustomers() {
+      const q = normalizeSearch(searchTerm.trim());
+      if (!q) return sortedCustomers();
+      return sortedCustomers().filter(customer =>
+        normalizeSearch([customer.firstName,customer.lastName,customer.mobile,customer.phone,customer.lastMix,customer.preferredContact,customer.employee,customer.isRegular ? 'stammkunde' : ''].join(' ')).includes(q)
+      );
+    }
+
+    function renderLetters() {
+      const available = new Set(filteredCustomers().map(c => (c.lastName && c.lastName[0] ? c.lastName[0] : (c.firstName && c.firstName[0] ? c.firstName[0] : '#')).toUpperCase()));
+      els.letters.innerHTML = LETTERS.map(letter => `<span class="letter ${available.has(letter) ? 'active' : ''}">${letter}</span>`).join('');
+    }
+
+    function avatarHtml(src, fullName, sizeClass) {
+      if (src) return `<img src="${src}" alt="${escapeAttr(fullName)}" class="avatar ${sizeClass}" />`;
+      const initials = fullName.split(' ').map(p => p[0] || '').join('').slice(0,2).toUpperCase() || 'K';
+      return `<div class="avatar ${sizeClass}">${escapeHtml(initials)}</div>`;
+    }
+
+    function renderCustomers() {
+      const list = filteredCustomers();
+      els.countBadge.textContent = `${customers.length} Kunden`;
+      renderLetters();
+
+      if (!list.length) {
+        els.customers.innerHTML = `<div class="empty">Keine passenden Kunden gefunden.</div>`;
         return;
       }
 
-      msg.innerText = "";
-      loginBox.style.display = "none";
-      appBox.style.display = "block";
-      await loadCustomers();
+      const avatarClass = settings.cardSize === 'large' ? 'large' : settings.cardSize === 'compact' ? 'compact' : '';
+      const titleClass = settings.cardSize === 'large' ? 'large' : settings.cardSize === 'compact' ? 'compact' : 'normal';
+      const bodyClass = settings.cardSize;
+
+      els.customers.innerHTML = list.map(customer => `
+        <div>
+          <article class="card ${highlightId === customer.id ? 'highlight' : ''}">
+            <div class="card-head">
+              <div class="card-head-top">
+                <div class="main">
+                  ${avatarHtml(customer.photo, `${customer.firstName} ${customer.lastName}`, avatarClass)}
+                  <div class="meta">
+                    <div class="eyebrow">👁️ Schnellansicht ${customer.isRegular ? '<span class="pill dark">Stammkunde</span>' : ''}</div>
+                    <div class="title ${titleClass}">${escapeHtml(customer.firstName)} ${escapeHtml(customer.lastName)}</div>
+                    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+                      <span class="pill">${customer.preferredContact === 'mobile' ? 'Bevorzugt: Mobil' : 'Bevorzugt: Festnetz'}</span>
+                      ${customer.employee ? `<span class="pill">🧑‍💼 ${escapeHtml(customer.employee)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="primary detail-btn" data-edit="${customer.id}">✏️ Details</button>
+              </div>
+            </div>
+            <div class="card-body ${bodyClass}">
+              <div class="contacts">
+                <div class="contact ${customer.preferredContact === 'mobile' ? 'active' : ''}">
+                  <span>📱</span><span>${escapeHtml(customer.mobile || '—')}</span>
+                  ${customer.preferredContact === 'mobile' ? '<span style="margin-left:auto">⭐</span>' : '<span class="contact-right">Mobil</span>'}
+                </div>
+                <div class="contact ${customer.preferredContact === 'phone' ? 'active' : ''}">
+                  <span>☎️</span><span>${escapeHtml(customer.phone || '—')}</span>
+                  ${customer.preferredContact === 'phone' ? '<span style="margin-left:auto">⭐</span>' : '<span class="contact-right">Festnetz</span>'}
+                </div>
+              </div>
+              <div class="mix">
+                <div class="mix-top">
+                  <div class="mix-title">✨ Letzte Mischung</div>
+                  <button type="button" class="outline-amber" data-copy-mix="${customer.id}" ${customer.lastMix ? '' : 'disabled'}>📋 Kopieren</button>
+                </div>
+                <div class="mix-text">${escapeHtml(customer.lastMix || 'Noch keine Mischung hinterlegt.')}</div>
+              </div>
+            </div>
+          </article>
+          <div class="item-actions">
+            <button type="button" class="outline-amber" data-copy-pref="${customer.id}">📋 Bevorzugte Nummer kopieren</button>
+            <button type="button" data-edit="${customer.id}">✏️ Bearbeiten</button>
+            <button type="button" class="danger" data-delete="${customer.id}">🗑️ Löschen</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSettingsUI() {
+      els.defaultEmployee.value = settings.defaultEmployee;
+      els.autoBackupToggle.textContent = settings.autoBackupEnabled ? 'Aktiv' : 'Aus';
+      els.autoBackupToggle.className = `switch ${settings.autoBackupEnabled ? 'on' : 'off'}`;
+      els.regularsToggle.textContent = settings.showRegularsFirst ? 'Aktiv' : 'Aus';
+      els.regularsToggle.className = `switch ${settings.showRegularsFirst ? 'on' : 'off'}`;
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.toggle('primary', btn.dataset.theme === settings.theme));
+      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.toggle('primary', btn.dataset.size === settings.cardSize));
+      document.querySelectorAll('.limit-btn').forEach(btn => btn.classList.toggle('primary', Number(btn.dataset.limit) === settings.backupLimit));
+    }
+
+    function renderHistory() {
+      if (!backups.length) {
+        els.historyList.innerHTML = `<p class="small-muted">Noch keine Backups vorhanden.</p>`;
+        return;
+      }
+      els.historyList.innerHTML = backups.map(backup => `
+        <div class="settings-box" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <span style="font-size:14px">${new Date(backup.date).toLocaleString()}</span>
+          <button type="button" data-restore="${backup.id}">Wiederherstellen</button>
+        </div>
+      `).join('');
+    }
+
+    function syncFormToInputs() {
+      els.formTitle.textContent = editingId ? 'Kunde bearbeiten' : 'Neuen Kunden anlegen';
+      els.firstName.value = formState.firstName || '';
+      els.lastName.value = formState.lastName || '';
+      els.mobile.value = formState.mobile || '';
+      els.phone.value = formState.phone || '';
+      els.employee.value = formState.employee || '';
+      els.lastMix.value = formState.lastMix || '';
+      updateFormUI();
+    }
+
+    function syncInputsToForm() {
+      formState.firstName = toTitleCase(els.firstName.value);
+      formState.lastName = toTitleCase(els.lastName.value);
+      formState.mobile = formatPhoneNumber(els.mobile.value);
+      formState.phone = formatPhoneNumber(els.phone.value);
+      formState.employee = toTitleCase(els.employee.value);
+      formState.lastMix = els.lastMix.value.trim();
+      formState.updatedAt = new Date().toISOString();
+    }
+
+    function updateFormUI() {
+      els.prefMobile.classList.toggle('active', formState.preferredContact === 'mobile');
+      els.prefPhone.classList.toggle('active', formState.preferredContact === 'phone');
+      els.starMobile.classList.toggle('hidden', formState.preferredContact !== 'mobile');
+      els.starPhone.classList.toggle('hidden', formState.preferredContact !== 'phone');
+      els.regularBtn.classList.toggle('active', !!formState.isRegular);
+      els.copyMixBtn.disabled = !formState.lastMix;
+      els.removePhotoBtn.style.display = formState.photo ? 'inline-flex' : 'none';
+      els.avatarPreview.innerHTML = avatarHtml(formState.photo, `${formState.firstName} ${formState.lastName}`, 'large');
+    }
+
+    function openOverlay(el) {
+      el.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeOverlay(el) {
+      el.classList.remove('open');
+      document.body.style.overflow = '';
     }
 
     async function loadCustomers() {
-      customersBox.innerHTML = "";
-      appMsg.innerText = "";
-
       const { data, error } = await supabaseClient
         .from("customers")
-        .select("*");
+        .select("*")
+        .order("updated_at", { ascending: false });
 
       if (error) {
-        appMsg.innerText = "Fehler beim Laden: " + error.message;
         console.log(error);
+        els.customers.innerHTML = `<div class="empty">Fehler beim Laden der Kunden.</div>`;
         return;
       }
 
-      if (!data || data.length === 0) {
-        customersBox.innerHTML = '<div class="customer">Noch keine Kunden vorhanden.</div>';
-        return;
-      }
-
-      data.forEach(c => {
-        const div = document.createElement("div");
-        div.className = "customer";
-       div.innerHTML = `
-  ${c.first_name || "Kunde"}
-  <br>
-  <button onclick="deleteCustomer('${c.id}')">❌ Löschen</button>
-`;
-        customersBox.appendChild(div);
-      });
+      customers = (data || []).map(rowToCustomer);
+      renderCustomers();
     }
 
-    async function addCustomer() {
-      const name = newNameInput.value.trim();
+    async function login() {
+      const email = els.loginEmail.value.trim();
+      const password = els.loginPassword.value;
 
-      if (!name) {
-        appMsg.innerText = "Bitte einen Namen eingeben.";
+      if (!email || !password) {
+        els.loginMsg.textContent = "Bitte E-Mail und Passwort eingeben.";
         return;
       }
 
-      appMsg.innerText = "Speichere...";
+      els.loginMsg.textContent = "Anmeldung läuft...";
 
-     const { data: { user } } = await supabaseClient.auth.getUser();
-
-await supabaseClient
-  .from("customers")
-  .insert([{
-    first_name: name,
-    owner_id: user.id
-  }]);
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) {
-        appMsg.innerText = "Fehler beim Speichern: " + error.message;
-        console.log(error);
+        els.loginMsg.textContent = "Fehler: " + error.message;
         return;
       }
 
-      newNameInput.value = "";
-      appMsg.innerText = "Gespeichert.";
+      currentUser = data.user;
+      els.loginMsg.textContent = "";
+      els.loginView.classList.add("hidden");
+      els.appView.classList.remove("hidden");
+      els.userInfo.textContent = `Angemeldet als ${currentUser.email}`;
       await loadCustomers();
     }
 
-    async function checkSession() {
-      const { data } = await supabaseClient.auth.getSession();
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      currentUser = null;
+      customers = [];
+      els.appView.classList.add("hidden");
+      els.loginView.classList.remove("hidden");
+      els.loginPassword.value = "";
+      els.loginMsg.textContent = "";
+    }
 
-      if (data && data.session) {
-        loginBox.style.display = "none";
-        appBox.style.display = "block";
+    function newCustomer() {
+      editingId = null;
+      formState = createEmptyCustomer(settings.defaultEmployee);
+      syncFormToInputs();
+      openOverlay(els.formOverlay);
+    }
+
+    function editCustomer(id) {
+      const customer = customers.find(c => c.id === id);
+      if (!customer) return;
+      editingId = id;
+      formState = JSON.parse(JSON.stringify(customer));
+      syncFormToInputs();
+      openOverlay(els.formOverlay);
+    }
+
+    async function saveCustomer() {
+      syncInputsToForm();
+      if (!currentUser || !currentUser.id) return;
+
+      const payload = customerToRow(formState);
+
+      if (!payload.first_name || !payload.last_name) {
+        showToast("Vorname und Nachname fehlen");
+        return;
+      }
+
+      let result;
+
+      if (editingId) {
+        result = await supabaseClient
+          .from("customers")
+          .update(payload)
+          .eq("id", editingId);
+      } else {
+        result = await supabaseClient
+          .from("customers")
+          .insert([payload]);
+      }
+
+      if (result.error) {
+        console.log(result.error);
+        showToast("Speichern fehlgeschlagen");
+        return;
+      }
+
+      await loadCustomers();
+      saveBackupSnapshot();
+      closeOverlay(els.formOverlay);
+      showToast(editingId ? "Kunde aktualisiert" : "Kunde gespeichert");
+      editingId = null;
+      formState = createEmptyCustomer(settings.defaultEmployee);
+    }
+
+    function askDelete(id) {
+      deleteId = id;
+      openOverlay(els.deleteOverlay);
+    }
+
+    async function confirmDelete() {
+      if (!deleteId) return;
+
+      const { error } = await supabaseClient
+        .from("customers")
+        .delete()
+        .eq("id", deleteId);
+
+      if (error) {
+        console.log(error);
+        showToast("Löschen fehlgeschlagen");
+        return;
+      }
+
+      deleteId = null;
+      closeOverlay(els.deleteOverlay);
+      await loadCustomers();
+      saveBackupSnapshot();
+      showToast("Kunde gelöscht");
+    }
+
+    function exportBackup() {
+      const payload = {
+        app: 'HairBase Pro Supabase',
+        exportedAt: new Date().toISOString(),
+        customers,
+        settings
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hairbase-pro-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Backup exportiert");
+    }
+
+    async function importBackup(file) {
+      if (!file || !currentUser) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const importedCustomers = Array.isArray(parsed.customers) ? parsed.customers : [];
+
+        if (!importedCustomers.length) {
+          showToast("Keine Kunden gefunden");
+          return;
+        }
+
+        const rows = importedCustomers.map(c => customerToRow({
+          id: '',
+          firstName: c.firstName || c.first_name || '',
+          lastName: c.lastName || c.last_name || '',
+          phone: c.phone || '',
+          mobile: c.mobile || '',
+          preferredContact: c.preferredContact || c.preferred_contact || 'mobile',
+          employee: c.employee || '',
+          lastMix: c.lastMix || c.last_mix || '',
+          photo: c.photo || '',
+          isRegular: !!(c.isRegular || c.is_regular),
+          updatedAt: new Date().toISOString()
+        }));
+
+        const { error } = await supabaseClient.from("customers").insert(rows);
+
+        if (error) {
+          console.log(error);
+          showToast("Import fehlgeschlagen");
+          return;
+        }
+
         await loadCustomers();
+        showToast("Backup importiert");
+      } catch (err) {
+        console.log(err);
+        showToast("Import fehlgeschlagen");
       }
     }
 
-    loginBtn.addEventListener("click", login);
-    saveBtn.addEventListener("click", addCustomer);
+    function restoreBackup(id) {
+      const backup = backups.find(b => b.id === id);
+      if (!backup) return;
+      const blob = new Blob([JSON.stringify({ customers: backup.data, settings }, null, 2)], { type:'application/json' });
+      const file = new File([blob], "backup.json", { type:"application/json" });
+      importBackup(file);
+      closeOverlay(els.historyOverlay);
+    }
 
-    passwordInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") login();
+    function copyPreferred(id) {
+      const customer = customers.find(c => c.id === id);
+      if (!customer) return;
+      copyText(customer.preferredContact === 'mobile' ? customer.mobile : customer.phone);
+    }
+
+    function copyMixFromCard(id) {
+      const customer = customers.find(c => c.id === id);
+      if (!customer) return;
+      copyText(customer.lastMix);
+    }
+
+    function handleImage(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        formState.photo = String(reader.result || '');
+        updateFormUI();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function escapeHtml(str) {
+      return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replaceAll("'", '&#39;');
+    }
+
+    function loadInitial() {
+      loadSettings();
+      applyTheme();
+      updateSettingsUI();
+      renderCustomers();
+    }
+
+    // static events
+    els.searchInput.addEventListener('input', e => {
+      searchTerm = e.target.value || '';
+      renderCustomers();
     });
 
-    newNameInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") addCustomer();
+    els.newBtn.addEventListener('click', newCustomer);
+    els.reloadBtn.addEventListener('click', loadCustomers);
+    els.exportBtn.addEventListener('click', exportBackup);
+    els.importBtn.addEventListener('click', () => els.fileInput.click());
+    els.historyBtn.addEventListener('click', () => {
+      renderHistory();
+      openOverlay(els.historyOverlay);
+    });
+    els.settingsBtn.addEventListener('click', () => {
+      updateSettingsUI();
+      openOverlay(els.settingsOverlay);
+    });
+    els.logoutBtn.addEventListener('click', logout);
+    els.fileInput.addEventListener('change', e => importBackup(e.target.files && e.target.files[0]));
+
+    els.loginBtn.addEventListener('click', login);
+    els.loginPassword.addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
     });
 
+    els.settingsClose.addEventListener('click', () => {
+      saveSettings();
+      applyTheme();
+      renderCustomers();
+      closeOverlay(els.settingsOverlay);
+    });
+    els.defaultEmployee.addEventListener('input', e => { settings.defaultEmployee = toTitleCase(e.target.value); });
+    els.autoBackupToggle.addEventListener('click', () => {
+      settings.autoBackupEnabled = !settings.autoBackupEnabled;
+      updateSettingsUI();
+    });
+    els.regularsToggle.addEventListener('click', () => {
+      settings.showRegularsFirst = !settings.showRegularsFirst;
+      updateSettingsUI();
+      renderCustomers();
+    });
+    document.querySelectorAll('.theme-btn').forEach(btn => btn.addEventListener('click', () => {
+      settings.theme = btn.dataset.theme;
+      updateSettingsUI();
+      applyTheme();
+    }));
+    document.querySelectorAll('.size-btn').forEach(btn => btn.addEventListener('click', () => {
+      settings.cardSize = btn.dataset.size;
+      updateSettingsUI();
+      renderCustomers();
+    }));
+    document.querySelectorAll('.limit-btn').forEach(btn => btn.addEventListener('click', () => {
+      settings.backupLimit = Number(btn.dataset.limit);
+      updateSettingsUI();
+    }));
+    els.historyClose.addEventListener('click', () => closeOverlay(els.historyOverlay));
+
+    els.cancelBtn.addEventListener('click', () => closeOverlay(els.formOverlay));
+    els.saveBtn.addEventListener('click', saveCustomer);
+    els.mobile.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); });
+    els.phone.addEventListener('input', e => { e.target.value = formatPhoneNumber(e.target.value); });
+    els.lastMix.addEventListener('input', e => {
+      formState.lastMix = e.target.value;
+      updateFormUI();
+    });
+    els.copyMixBtn.addEventListener('click', () => copyText(els.lastMix.value));
+    els.prefMobile.addEventListener('click', () => {
+      formState.preferredContact = 'mobile';
+      updateFormUI();
+    });
+    els.prefPhone.addEventListener('click', () => {
+      formState.preferredContact = 'phone';
+      updateFormUI();
+    });
+    els.regularBtn.addEventListener('click', () => {
+      formState.isRegular = !formState.isRegular;
+      updateFormUI();
+    });
+    els.cameraInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
+    els.galleryInput.addEventListener('change', e => handleImage(e.target.files && e.target.files[0]));
+    els.removePhotoBtn.addEventListener('click', () => {
+      formState.photo = '';
+      updateFormUI();
+    });
+    els.deleteCancelBtn.addEventListener('click', () => closeOverlay(els.deleteOverlay));
+    els.deleteConfirmBtn.addEventListener('click', confirmDelete);
+
+    [els.settingsOverlay, els.historyOverlay, els.formOverlay, els.deleteOverlay].forEach(overlay => {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) closeOverlay(overlay);
+      });
+    });
+
+    document.addEventListener('click', e => {
+      const target = e.target.closest('[data-edit],[data-delete],[data-copy-pref],[data-copy-mix],[data-restore]');
+      if (!target) return;
+
+      if (target.dataset.edit) editCustomer(target.dataset.edit);
+      else if (target.dataset.delete) askDelete(target.dataset.delete);
+      else if (target.dataset.copyPref) copyPreferred(target.dataset.copyPref);
+      else if (target.dataset.copyMix) copyMixFromCard(target.dataset.copyMix);
+      else if (target.dataset.restore) restoreBackup(target.dataset.restore);
+    });
+
+    async function checkSession() {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data && data.session && data.session.user) {
+        currentUser = data.session.user;
+        els.loginView.classList.add('hidden');
+        els.appView.classList.remove('hidden');
+        els.userInfo.textContent = `Angemeldet als ${currentUser.email}`;
+        await loadCustomers();
+      } else {
+        els.loginView.classList.remove('hidden');
+        els.appView.classList.add('hidden');
+      }
+    }
+
+    loadInitial();
     checkSession();
-    async function deleteCustomer(id) {
-  const ok = confirm("Kunde wirklich löschen?");
-  if (!ok) return;
-
-  const { error } = await supabaseClient
-    .from("customers")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.log(error);
-    alert("Fehler beim Löschen");
-    return;
-  }
-
-  loadCustomers();
-}
   </script>
-
 </body>
 </html>
