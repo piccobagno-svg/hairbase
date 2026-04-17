@@ -106,7 +106,6 @@
       background:linear-gradient(135deg,#fef3c7,#fff7ed);display:flex;align-items:center;justify-content:center;
       color:#b45309;font-weight:800;overflow:hidden;
     }
-    .avatar.large{width:80px;height:80px}.avatar.compact{width:56px;height:56px}
     .meta{min-width:0}
     .eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:8px}
     .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text)}
@@ -119,6 +118,13 @@
     body.theme-contrast .pill{background:#222;color:#fff;border:1px solid #fff}
     .pill.dark{background:#18181b;color:#fff}
     body.theme-dark .pill.dark{background:#3f3f46}
+    .employee-pill{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;
+      border:1px solid transparent;
+    }
+    .employee-dot{
+      width:10px;height:10px;border-radius:999px;display:inline-block;flex:0 0 auto;
+    }
 
     .card-body{padding:0 22px 22px;display:grid}
     .card-body.compact{gap:12px}.card-body.normal{gap:16px}.card-body.large{gap:20px}
@@ -252,6 +258,15 @@
       background:var(--card);
       box-shadow:var(--shadow);
       padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .appointment::before{
+      content:"";
+      position:absolute;
+      left:0;top:0;bottom:0;
+      width:6px;
+      background:var(--employee-color, var(--amber));
     }
     .appointment.conflict{
       border-color:#f59e0b;
@@ -320,10 +335,20 @@
       padding:10px 12px;
       margin-bottom:10px;
       font-size:14px;
+      border-left:6px solid var(--employee-color, var(--amber));
     }
     .mini-appointment.conflict{
       border-color:#f59e0b;
       box-shadow:0 0 0 2px rgba(245,158,11,.18);
+    }
+    .mini-time{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .mini-duration{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
     }
 
     @media (min-width:640px){
@@ -607,7 +632,7 @@
     const SUPABASE_KEY = "sb_publishable_h2gH6NsfbbHOAhcIKBgzlg_iCReqKux";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const SETTINGS_KEY = 'hairbase_settings_v20_supabase';
+    const SETTINGS_KEY = 'hairbase_settings_v21_supabase';
     const DEFAULT_SETTINGS = {
       theme: 'system',
       defaultEmployee: '',
@@ -630,6 +655,17 @@
 
     let customerForm = emptyCustomer();
     let appointmentForm = emptyAppointment();
+
+    const EMPLOYEE_COLORS = [
+      { bg: '#fef3c7', text: '#92400e', border: '#f59e0b', accent: '#f59e0b' },
+      { bg: '#dbeafe', text: '#1d4ed8', border: '#60a5fa', accent: '#3b82f6' },
+      { bg: '#dcfce7', text: '#166534', border: '#4ade80', accent: '#22c55e' },
+      { bg: '#fce7f3', text: '#be185d', border: '#f472b6', accent: '#ec4899' },
+      { bg: '#ede9fe', text: '#6d28d9', border: '#a78bfa', accent: '#8b5cf6' },
+      { bg: '#cffafe', text: '#0f766e', border: '#22d3ee', accent: '#06b6d4' },
+      { bg: '#fee2e2', text: '#b91c1c', border: '#f87171', accent: '#ef4444' },
+      { bg: '#e0f2fe', text: '#0369a1', border: '#38bdf8', accent: '#0ea5e9' }
+    ];
 
     const els = {
       body: document.body,
@@ -916,6 +952,28 @@
       return (h * 60) + m;
     }
 
+    function getEmployeeColor(employeeName) {
+      const name = String(employeeName || '').trim().toLowerCase();
+      if (!name) return EMPLOYEE_COLORS[0];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = ((hash << 5) - hash) + name.charCodeAt(i);
+        hash |= 0;
+      }
+      const index = Math.abs(hash) % EMPLOYEE_COLORS.length;
+      return EMPLOYEE_COLORS[index];
+    }
+
+    function employeePillHtml(employeeName) {
+      const c = getEmployeeColor(employeeName);
+      return `
+        <span class="employee-pill" style="background:${c.bg};color:${c.text};border-color:${c.border}">
+          <span class="employee-dot" style="background:${c.accent}"></span>
+          ${escapeHtml(employeeName || '—')}
+        </span>
+      `;
+    }
+
     function getAppointmentConflicts(candidate, ignoreId = null) {
       if (!candidate || !candidate.date || !candidate.startTime || !candidate.employee) return [];
 
@@ -1024,7 +1082,7 @@
                     <div class="title normal">${escapeHtml(customer.firstName)} ${escapeHtml(customer.lastName)}</div>
                     <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
                       <span class="pill">${customer.preferredContact === 'mobile' ? 'Bevorzugt: Mobil' : 'Bevorzugt: Festnetz'}</span>
-                      ${customer.employee ? `<span class="pill">🧑‍💼 ${escapeHtml(customer.employee)}</span>` : ''}
+                      ${customer.employee ? employeePillHtml(customer.employee) : ''}
                     </div>
                   </div>
                 </div>
@@ -1098,9 +1156,10 @@
       els.appointments.innerHTML = list.map(item => {
         const conflicts = getAppointmentConflicts(item, item.id);
         const hasConflict = conflicts.length > 0;
+        const color = getEmployeeColor(item.employee);
 
         return `
-          <article class="appointment ${hasConflict ? 'conflict' : ''}">
+          <article class="appointment ${hasConflict ? 'conflict' : ''}" style="--employee-color:${color.accent}">
             <div class="appointment-top">
               <div>
                 <div class="appointment-time">${escapeHtml(item.startTime)} – ${escapeHtml(item.endTime || calcEndTime(item.startTime, item.durationMinutes) || '—')}</div>
@@ -1109,7 +1168,7 @@
               <span class="appointment-service">${escapeHtml(item.service)}</span>
             </div>
             <div class="appointment-meta">
-              <div>🧑‍💼 Mitarbeiter: ${escapeHtml(item.employee)}</div>
+              <div>${employeePillHtml(item.employee)}</div>
               <div>⏱️ Dauer: ${escapeHtml(String(item.durationMinutes))} Minuten</div>
               <div>📌 Status: ${escapeHtml(item.status)}</div>
               ${item.note ? `<div>📝 Notiz: ${escapeHtml(item.note)}</div>` : ''}
@@ -1146,9 +1205,13 @@
                 ? items.map(item => {
                     const conflicts = getAppointmentConflicts(item, item.id);
                     const hasConflict = conflicts.length > 0;
+                    const color = getEmployeeColor(item.employee);
+                    const endTime = item.endTime || calcEndTime(item.startTime, item.durationMinutes);
                     return `
-                      <div class="mini-appointment ${hasConflict ? 'conflict' : ''}">
-                        <div><strong>${escapeHtml(item.startTime)}</strong> ${escapeHtml(item.customerName || 'Ohne Kunde')}</div>
+                      <div class="mini-appointment ${hasConflict ? 'conflict' : ''}" style="--employee-color:${color.accent}">
+                        <div class="mini-time">${escapeHtml(item.startTime)}–${escapeHtml(endTime || '—')}</div>
+                        <div class="mini-duration">${escapeHtml(String(item.durationMinutes))} Min.</div>
+                        <div><strong>${escapeHtml(item.customerName || 'Ohne Kunde')}</strong></div>
                         <div>${escapeHtml(item.employee)} · ${escapeHtml(item.service)}</div>
                       </div>
                     `;
@@ -1507,7 +1570,6 @@
       }
     }
 
-    // init
     loadSettings();
     applyTheme();
     updateSettingsUI();
