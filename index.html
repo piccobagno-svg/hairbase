@@ -63,13 +63,6 @@
     .search-wrap{position:relative}
     .search-wrap input{padding-left:46px}
     .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#9ca3af}
-    .letters{display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-    .letter{padding:7px 12px;border-radius:999px;font-size:13px;font-weight:700;background:#e5e7eb;color:#9ca3af}
-    .letter.active{background:#18181b;color:#fff}
-    body.theme-dark .letter{background:#18181b;color:#71717a}
-    body.theme-dark .letter.active{background:#f4f4f5;color:#09090b}
-    body.theme-contrast .letter{background:#222;color:#999;border:1px solid #fff}
-    body.theme-contrast .letter.active{background:#fff;color:#000}
 
     input,textarea,button,select{font:inherit}
     input,textarea,select{
@@ -108,8 +101,7 @@
     }
     .meta{min-width:0}
     .eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:8px}
-    .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text)}
-    .title.normal{font-size:24px}.title.large{font-size:30px}.title.compact{font-size:20px}
+    .title{font-weight:800;line-height:1.1;word-break:break-word;color:var(--text);font-size:24px}
     .pill{
       display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:700;
       background:#fef3c7;color:#92400e
@@ -126,8 +118,7 @@
       width:10px;height:10px;border-radius:999px;display:inline-block;flex:0 0 auto;
     }
 
-    .card-body{padding:0 22px 22px;display:grid}
-    .card-body.compact{gap:12px}.card-body.normal{gap:16px}.card-body.large{gap:20px}
+    .card-body{padding:0 22px 22px;display:grid;gap:16px}
     .contacts{display:grid;gap:12px}
     .contact{
       min-height:48px;border-radius:16px;padding:14px;display:flex;align-items:center;gap:10px;
@@ -633,6 +624,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const SETTINGS_KEY = 'hairbase_settings_v21_supabase';
+    const SAVED_EMAIL_KEY = 'hairbase_saved_email';
     const DEFAULT_SETTINGS = {
       theme: 'system',
       defaultEmployee: '',
@@ -1079,7 +1071,7 @@
                   ${avatarHtml(customer.photo, `${customer.firstName} ${customer.lastName}`)}
                   <div class="meta">
                     <div class="eyebrow">👁️ Schnellansicht ${customer.isRegular ? '<span class="pill dark">Stammkunde</span>' : ''}</div>
-                    <div class="title normal">${escapeHtml(customer.firstName)} ${escapeHtml(customer.lastName)}</div>
+                    <div class="title">${escapeHtml(customer.firstName)} ${escapeHtml(customer.lastName)}</div>
                     <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
                       <span class="pill">${customer.preferredContact === 'mobile' ? 'Bevorzugt: Mobil' : 'Bevorzugt: Festnetz'}</span>
                       ${customer.employee ? employeePillHtml(customer.employee) : ''}
@@ -1089,7 +1081,7 @@
                 <button type="button" class="primary" data-edit-customer="${customer.id}">✏️ Details</button>
               </div>
             </div>
-            <div class="card-body normal">
+            <div class="card-body">
               <div class="contacts">
                 <div class="contact ${customer.preferredContact === 'mobile' ? 'active' : ''}">
                   <span>📱</span><span>${escapeHtml(customer.mobile || '—')}</span>
@@ -1530,19 +1522,35 @@
 
       els.loginMsg.textContent = "Anmeldung läuft...";
 
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
-      if (error) {
-        els.loginMsg.textContent = "Fehler: " + error.message;
-        return;
+        if (error) {
+          console.log("LOGIN ERROR:", error);
+          els.loginMsg.textContent = "Fehler: " + error.message;
+          return;
+        }
+
+        if (!data || !data.user) {
+          els.loginMsg.textContent = "Login fehlgeschlagen.";
+          return;
+        }
+
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
+
+        currentUser = data.user;
+        els.loginMsg.textContent = "";
+        els.loginView.classList.add("hidden");
+        els.appView.classList.remove("hidden");
+        els.userInfo.textContent = `Angemeldet als ${currentUser.email}`;
+        await refreshAll();
+      } catch (err) {
+        console.log("LOGIN CATCH:", err);
+        els.loginMsg.textContent = "Unerwarteter Fehler beim Login.";
       }
-
-      currentUser = data.user;
-      els.loginMsg.textContent = "";
-      els.loginView.classList.add("hidden");
-      els.appView.classList.remove("hidden");
-      els.userInfo.textContent = `Angemeldet als ${currentUser.email}`;
-      await refreshAll();
     }
 
     async function logout() {
@@ -1557,16 +1565,24 @@
     }
 
     async function checkSession() {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data && data.session && data.session.user) {
+      const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
+      if (savedEmail) els.loginEmail.value = savedEmail;
+
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) {
+        console.log("SESSION ERROR:", error);
+      }
+
+      if (data?.session?.user) {
         currentUser = data.session.user;
-        els.loginView.classList.add('hidden');
-        els.appView.classList.remove('hidden');
+        els.loginView.classList.add("hidden");
+        els.appView.classList.remove("hidden");
         els.userInfo.textContent = `Angemeldet als ${currentUser.email}`;
         await refreshAll();
       } else {
-        els.loginView.classList.remove('hidden');
-        els.appView.classList.add('hidden');
+        els.loginView.classList.remove("hidden");
+        els.appView.classList.add("hidden");
       }
     }
 
@@ -1692,3 +1708,5 @@
   </script>
 </body>
 </html>
+
+So besser?ံုး
