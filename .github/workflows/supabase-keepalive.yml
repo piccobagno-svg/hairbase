@@ -1,6 +1,11 @@
 name: HairBase Supabase Keep Alive
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/supabase-keepalive.yml"
   schedule:
     - cron: "17 6,18 * * *"
   workflow_dispatch:
