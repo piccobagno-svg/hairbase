@@ -1,0 +1,48 @@
+name: HairBase Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: "17 6,18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout HairBase
+        uses: actions/checkout@v4
+
+      - name: Read Supabase configuration
+        shell: bash
+        run: |
+          SUPABASE_URL=$(grep -m1 'const SUPABASE_URL' index.html | sed -E 's/.*"([^"]+)".*/\1/')
+          SUPABASE_KEY=$(grep -m1 'const SUPABASE_KEY' index.html | sed -E 's/.*"([^"]+)".*/\1/')
+
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "Supabase URL oder Publishable Key konnte nicht aus index.html gelesen werden."
+            exit 1
+          fi
+
+          echo "SUPABASE_URL=$SUPABASE_URL" >> "$GITHUB_ENV"
+          echo "SUPABASE_KEY=$SUPABASE_KEY" >> "$GITHUB_ENV"
+
+      - name: Ping Supabase database
+        shell: bash
+        run: |
+          HTTP_CODE=$(curl -sS -o /tmp/supabase-response.txt -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/customers?select=id&limit=1" \
+            -H "apikey: ${SUPABASE_KEY}")
+
+          echo "Supabase HTTP status: ${HTTP_CODE}"
+
+          if [ "${HTTP_CODE}" -ge 500 ]; then
+            echo "Supabase ist nicht erreichbar:"
+            cat /tmp/supabase-response.txt
+            exit 1
+          fi
+
+          echo "Keep-alive request completed."
